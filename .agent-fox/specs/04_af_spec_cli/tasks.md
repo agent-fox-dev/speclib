@@ -166,8 +166,8 @@ wiring verification.
     - [x] All existing tests still pass: `uv run pytest -q`
     - [x] No linter warnings: `uv run ruff check speclib/cli.py`
 
-- [ ] 4. Implement campaign commands
-  - [ ] 4.1 Implement init command
+- [x] 4. Implement campaign commands
+  - [x] 4.1 Implement init command
     - `@main.command("init")` with `path`, `--name`, `--description` params
     - Resolve relative path to absolute
     - Default name to directory basename
@@ -176,7 +176,7 @@ wiring verification.
     - Print confirmation with absolute path
     - _Requirements: 04-REQ-1.1, 04-REQ-1.2, 04-REQ-1.3, 04-REQ-1.4, 04-REQ-1.E1_
 
-  - [ ] 4.2 Implement list command
+  - [x] 4.2 Implement list command
     - `@main.command("list")` with optional `campaign_dir` argument
     - Use argument if provided, otherwise use context campaign_dir
     - Open campaign, list specs with session state
@@ -184,12 +184,12 @@ wiring verification.
     - Handle empty campaign
     - _Requirements: 04-REQ-2.1, 04-REQ-2.2, 04-REQ-2.3, 04-REQ-2.4, 04-REQ-2.E1_
 
-  - [ ] 4.V Verify task group 4
-    - [ ] Campaign command tests pass (TS-04-1 through TS-04-10)
-    - [ ] Property test P4 (init no overwrite) passes
-    - [ ] Smoke test SMOKE-1 (init and list) passes
-    - [ ] All existing tests still pass: `uv run pytest -q`
-    - [ ] No linter warnings: `uv run ruff check speclib/cli.py`
+  - [x] 4.V Verify task group 4
+    - [x] Campaign command tests pass (TS-04-1 through TS-04-10)
+    - [x] Property test P4 (init no overwrite) passes
+    - [x] Smoke test SMOKE-1 (init and list) passes
+    - [x] All existing tests still pass: `uv run pytest -q`
+    - [x] No linter warnings: `uv run ruff check speclib/cli.py`
 
 - [ ] 5. Implement spec authoring commands (new, assess, refine, accept)
   - [ ] 5.1 Implement new command
