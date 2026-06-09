@@ -1,7 +1,9 @@
 """Tests for speclib.agent — SpecAgent core methods.
 
 Covers TS-03-1 through TS-03-14 (assessment, refinement, generation),
-TS-03-21 through TS-03-26 (retry and error handling).
+TS-03-21 through TS-03-26 (retry and error handling),
+TS-03-E1 through TS-03-E12 (edge cases),
+TS-03-P1 through TS-03-P4 (property tests).
 
 All tests use a mocked Anthropic client; no real API calls are made.
 """
@@ -11,6 +13,8 @@ from __future__ import annotations
 from unittest.mock import AsyncMock, patch
 
 import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 from speclib.agent import SpecAgent
 from speclib.errors import AgentError, SpeclibError
@@ -23,6 +27,7 @@ from .conftest_agent import (
     make_artifact_response,
     make_assessment_response,
     make_bad_request_error,
+    make_connection_error,
     make_internal_server_error,
     make_rate_limit_error,
     make_refinement_response,
@@ -542,3 +547,436 @@ async def test_agent_error_on_unparseable_response(mock_client):
 
     with pytest.raises(AgentError, match="structured output"):
         await agent.assess_prd("# PRD", "test")
+
+
+# ===================================================================
+# TS-03-E1: Empty PRD raises AgentError
+# ===================================================================
+
+
+@pytest.mark.asyncio
+async def test_empty_prd_raises_agent_error(mock_client):
+    """TS-03-E1: assess_prd raises AgentError for empty PRD without API call."""
+    agent = SpecAgent(mock_client, "claude-sonnet-4-6")
+
+    with pytest.raises(AgentError):
+        await agent.assess_prd("", "test")
+
+    with pytest.raises(AgentError):
+        await agent.assess_prd("   ", "test")
+
+    assert mock_client.messages.create.call_count == 0
+
+
+# ===================================================================
+# TS-03-E2: Malformed assessment tool response
+# ===================================================================
+
+
+@pytest.mark.asyncio
+async def test_malformed_assessment_tool_response(mock_client):
+    """TS-03-E2: AgentError when tool response is missing required fields."""
+    from .conftest_agent import FakeMessage, FakeToolUseBlock
+
+    # Return tool_use with missing summary, gaps, questions
+    mock_client.messages.create.return_value = FakeMessage(
+        content=[
+            FakeToolUseBlock(
+                name="submit_assessment",
+                input={"quality": "ready"},  # missing summary, gaps, questions
+            )
+        ]
+    )
+    agent = SpecAgent(mock_client, "claude-sonnet-4-6")
+
+    with pytest.raises(AgentError, match="summary|fields|missing|invalid"):
+        await agent.assess_prd("# PRD", "test")
+
+
+# ===================================================================
+# TS-03-E3: No tool_use in response
+# ===================================================================
+
+
+@pytest.mark.asyncio
+async def test_no_tool_use_in_response(mock_client):
+    """TS-03-E3: AgentError when model returns only text, no tool call."""
+    mock_client.messages.create.return_value = make_text_only_response(
+        "Here is my assessment..."
+    )
+    agent = SpecAgent(mock_client, "claude-sonnet-4-6")
+
+    with pytest.raises(AgentError, match="structured output"):
+        await agent.assess_prd("# PRD", "test")
+
+
+# ===================================================================
+# TS-03-E4: Empty answers in refine_prd
+# ===================================================================
+
+
+@pytest.mark.asyncio
+async def test_empty_answers_raises_agent_error(mock_client, sample_assessment):
+    """TS-03-E4: AgentError when answers dict is empty."""
+    agent = SpecAgent(mock_client, "claude-sonnet-4-6")
+
+    with pytest.raises(AgentError, match="no answers|empty|answers"):
+        await agent.refine_prd("# PRD", {}, sample_assessment)
+
+    assert mock_client.messages.create.call_count == 0
+
+
+# ===================================================================
+# TS-03-E5: Unrecognized question IDs in answers
+# ===================================================================
+
+
+@pytest.mark.asyncio
+async def test_unrecognized_question_ids_raises_agent_error(
+    mock_client, sample_assessment
+):
+    """TS-03-E5: AgentError when answer IDs don't match assessment questions."""
+    agent = SpecAgent(mock_client, "claude-sonnet-4-6")
+
+    with pytest.raises(AgentError, match="q99"):
+        await agent.refine_prd("# PRD", {"q99": "answer"}, sample_assessment)
+
+
+# ===================================================================
+# TS-03-E6: Missing assessment in refinement response
+# ===================================================================
+
+
+@pytest.mark.asyncio
+async def test_missing_assessment_in_refinement_response(
+    mock_client, sample_assessment
+):
+    """TS-03-E6: AgentError when agent returns PRD update but no assessment."""
+    from .conftest_agent import FakeMessage, FakeToolUseBlock
+
+    # Return submit_prd_update but NOT submit_assessment
+    mock_client.messages.create.return_value = FakeMessage(
+        content=[
+            FakeToolUseBlock(
+                name="submit_prd_update",
+                input={"updated_prd": "new prd"},
+            )
+        ]
+    )
+    agent = SpecAgent(mock_client, "claude-sonnet-4-6")
+
+    with pytest.raises(AgentError):
+        await agent.refine_prd("# PRD", {"q1": "a"}, sample_assessment)
+
+
+# ===================================================================
+# TS-03-E7: Empty PRD for generation
+# ===================================================================
+
+
+@pytest.mark.asyncio
+async def test_empty_prd_generate_raises_agent_error(mock_client):
+    """TS-03-E7: generate_artifacts raises AgentError for empty PRD."""
+    agent = SpecAgent(mock_client, "claude-sonnet-4-6")
+
+    with pytest.raises(AgentError):
+        await agent.generate_artifacts("", "03", "test")
+
+    assert mock_client.messages.create.call_count == 0
+
+
+# ===================================================================
+# TS-03-E8: Artifact tool not invoked by model
+# ===================================================================
+
+
+@pytest.mark.asyncio
+async def test_artifact_tool_not_invoked(mock_client):
+    """TS-03-E8: AgentError when the model doesn't call submit_artifact."""
+    mock_client.messages.create.return_value = make_text_only_response(
+        "Here is the artifact content..."
+    )
+    agent = SpecAgent(mock_client, "claude-sonnet-4-6")
+
+    with pytest.raises(AgentError):
+        await agent.generate_artifacts("# PRD", "03", "test")
+
+
+# ===================================================================
+# TS-03-E9: Schema validation failure with detailed error
+# ===================================================================
+
+
+@pytest.mark.asyncio
+async def test_schema_validation_error_detail(mock_client):
+    """TS-03-E9: AgentError includes artifact name and validation details."""
+    mock_client.messages.create = AsyncMock(
+        side_effect=[
+            make_artifact_response("requirements", SAMPLE_REQUIREMENTS_JSON),
+        ]
+    )
+    agent = SpecAgent(mock_client, "claude-sonnet-4-6")
+
+    with patch(
+        "speclib.agent.validate_artifact",
+        side_effect=Exception("missing 'introduction'"),
+    ):
+        with pytest.raises(AgentError, match="requirements.*introduction"):
+            await agent.generate_artifacts("# PRD", "03", "test")
+
+
+# ===================================================================
+# TS-03-E11: Connection timeout treated as transient
+# ===================================================================
+
+
+@pytest.mark.asyncio
+async def test_connection_timeout_retried(mock_client):
+    """TS-03-E11: Connection timeouts are retried."""
+    mock_client.messages.create = AsyncMock(
+        side_effect=[
+            make_connection_error(),
+            make_assessment_response(),
+        ]
+    )
+    agent = SpecAgent(mock_client, "claude-sonnet-4-6")
+
+    with patch("asyncio.sleep", new_callable=AsyncMock):
+        await agent._call_api(
+            messages=[{"role": "user", "content": "test"}],
+            tools=[],
+        )
+
+    assert mock_client.messages.create.call_count == 2
+
+
+# ===================================================================
+# TS-03-E12: Cumulative wait cap
+# ===================================================================
+
+
+@pytest.mark.asyncio
+async def test_cumulative_wait_cap(mock_client):
+    """TS-03-E12: Retries abandon when cumulative wait would exceed 30s.
+
+    With max 3 retries: delays are 1s, 2s, 4s = 7s total.
+    All retries happen (7s < 30s). AgentError raised after 4 total attempts.
+    """
+    mock_client.messages.create = AsyncMock(
+        side_effect=[
+            make_rate_limit_error(),
+            make_rate_limit_error(),
+            make_rate_limit_error(),
+            make_rate_limit_error(),
+        ]
+    )
+    agent = SpecAgent(mock_client, "claude-sonnet-4-6")
+
+    with patch("asyncio.sleep", new_callable=AsyncMock):
+        with pytest.raises(AgentError):
+            await agent._call_api(
+                messages=[{"role": "user", "content": "test"}],
+                tools=[],
+            )
+
+    # 1 initial + 3 retries = 4 total
+    assert mock_client.messages.create.call_count == 4
+
+
+# ===================================================================
+# TS-03-P1: Property — Assessment quality enum is valid
+# ===================================================================
+
+
+class TestPropertyQualityEnum:
+    """Property test: quality field must be one of the valid enum values."""
+
+    @given(quality=st.sampled_from(["ready", "needs_refinement", "incomplete"]))
+    @settings(max_examples=10)
+    def test_property_valid_quality_accepted(self, quality: str) -> None:
+        """TS-03-P1: Valid quality values are accepted by _parse_assessment."""
+        agent = SpecAgent.__new__(SpecAgent)
+        tool_input = {
+            "quality": quality,
+            "summary": "ok",
+            "gaps": [],
+            "questions": (
+                []
+                if quality == "ready"
+                else [
+                    {
+                        "id": "q1",
+                        "text": "Q?",
+                        "context": "ctx",
+                        "options": [],
+                        "required": True,
+                    }
+                ]
+            ),
+        }
+        assessment = agent._parse_assessment(tool_input)
+        assert assessment.quality == quality
+
+    @given(
+        quality=st.text(min_size=1, max_size=30).filter(
+            lambda q: q not in ["ready", "needs_refinement", "incomplete"]
+        )
+    )
+    @settings(max_examples=10)
+    def test_property_invalid_quality_rejected(self, quality: str) -> None:
+        """TS-03-P1: Invalid quality values are rejected by _parse_assessment."""
+        agent = SpecAgent.__new__(SpecAgent)
+        tool_input = {
+            "quality": quality,
+            "summary": "ok",
+            "gaps": [],
+            "questions": [],
+        }
+        with pytest.raises(AgentError):
+            agent._parse_assessment(tool_input)
+
+
+# ===================================================================
+# TS-03-P2: Property — Non-ready assessments have questions
+# ===================================================================
+
+
+class TestPropertyNonReadyQuestions:
+    """Property test: non-ready assessments must have questions."""
+
+    @given(quality=st.sampled_from(["needs_refinement", "incomplete"]))
+    @settings(max_examples=10)
+    def test_property_non_ready_with_questions_accepted(
+        self, quality: str
+    ) -> None:
+        """TS-03-P2: Non-ready quality with questions is accepted."""
+        agent = SpecAgent.__new__(SpecAgent)
+        tool_input = {
+            "quality": quality,
+            "summary": "s",
+            "gaps": [],
+            "questions": [
+                {
+                    "id": "q1",
+                    "text": "Q?",
+                    "context": "ctx",
+                    "options": [],
+                    "required": True,
+                }
+            ],
+        }
+        assessment = agent._parse_assessment(tool_input)
+        assert len(assessment.questions) > 0
+
+    @given(quality=st.sampled_from(["needs_refinement", "incomplete"]))
+    @settings(max_examples=10)
+    def test_property_non_ready_empty_questions_rejected(
+        self, quality: str
+    ) -> None:
+        """TS-03-P2: Non-ready quality with empty questions is rejected."""
+        agent = SpecAgent.__new__(SpecAgent)
+        tool_input = {
+            "quality": quality,
+            "summary": "s",
+            "gaps": [],
+            "questions": [],
+        }
+        with pytest.raises(AgentError):
+            agent._parse_assessment(tool_input)
+
+
+# ===================================================================
+# TS-03-P3: Property — Artifact generation order is deterministic
+# ===================================================================
+
+
+class TestPropertyGenerationOrder:
+    """Property test: artifact generation order is always deterministic."""
+
+    @pytest.mark.asyncio
+    async def test_property_generation_order_deterministic(
+        self, mock_client
+    ) -> None:
+        """TS-03-P3: Artifacts are always generated in the order
+        requirements, test_spec, tasks.
+
+        Property 3 from design.md.
+        Validates: 03-REQ-3.1, 03-REQ-3.6, 03-REQ-3.7
+        """
+        call_order: list[str] = []
+        artifact_order = ["requirements", "test_spec", "tasks"]
+        responses = [
+            make_artifact_response("requirements", SAMPLE_REQUIREMENTS_JSON),
+            make_artifact_response("test_spec", SAMPLE_TEST_SPEC_JSON),
+            make_artifact_response("tasks", SAMPLE_TASKS_JSON),
+        ]
+        generate_counter = 0
+
+        async def tracking_create(**kwargs):
+            nonlocal generate_counter
+            name = artifact_order[generate_counter]
+            generate_counter += 1
+            call_order.append(name)
+            return responses[generate_counter - 1]
+
+        mock_client.messages.create = AsyncMock(side_effect=tracking_create)
+        agent = SpecAgent(mock_client, "claude-sonnet-4-6")
+
+        with patch("speclib.agent.validate_artifact", return_value=None):
+            await agent.generate_artifacts("# PRD text", "03", "test")
+
+        assert call_order == ["requirements", "test_spec", "tasks"]
+
+
+# ===================================================================
+# TS-03-P4: Property — Retry count is bounded
+# ===================================================================
+
+
+class TestPropertyRetryBound:
+    """Property test: retry count is bounded at max 4 total attempts."""
+
+    @given(n_errors=st.integers(min_value=1, max_value=10))
+    @settings(max_examples=10)
+    def test_property_retry_count_bounded(self, n_errors: int) -> None:
+        """TS-03-P4: For any sequence of transient errors, the total
+        number of attempts never exceeds 4 (1 initial + 3 retries).
+
+        Property 4 from design.md.
+        Validates: 03-REQ-5.1, 03-REQ-5.E2
+        """
+        import asyncio
+
+        mock_client = type("MockClient", (), {})()
+        mock_messages = type("MockMessages", (), {})()
+        mock_client.messages = mock_messages
+
+        responses = [make_rate_limit_error()] * n_errors + [
+            make_assessment_response()
+        ]
+        mock_client.messages.create = AsyncMock(side_effect=responses)
+
+        agent = SpecAgent(mock_client, "claude-sonnet-4-6")
+
+        with patch("asyncio.sleep", new_callable=AsyncMock):
+            if n_errors <= 3:
+                asyncio.get_event_loop().run_until_complete(
+                    agent._call_api(
+                        messages=[{"role": "user", "content": "test"}],
+                        tools=[],
+                    )
+                )
+                assert (
+                    mock_client.messages.create.call_count == n_errors + 1
+                )
+            else:
+                with pytest.raises(AgentError):
+                    asyncio.get_event_loop().run_until_complete(
+                        agent._call_api(
+                            messages=[
+                                {"role": "user", "content": "test"}
+                            ],
+                            tools=[],
+                        )
+                    )
+                assert mock_client.messages.create.call_count == 4

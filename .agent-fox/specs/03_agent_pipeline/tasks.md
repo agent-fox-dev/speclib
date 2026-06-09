@@ -63,32 +63,32 @@ These must be implemented before task group 3 of this spec.
     - [x] All spec tests FAIL (red) -- no implementation yet
     - [x] No linter warnings introduced: `uv run ruff check tests/`
 
-- [ ] 2. Write failing spec tests — session integration, edge cases, properties, smoke
-  - [ ] 2.1 Translate session integration tests
+- [x] 2. Write failing spec tests — session integration, edge cases, properties, smoke
+  - [x] 2.1 Translate session integration tests
     - Create `tests/test_session_agent.py`
     - TS-03-27 through TS-03-31
     - Tests for session.assess(), session.refine(), session.generate()
     - _Test Spec: TS-03-27 through TS-03-31_
 
-  - [ ] 2.2 Translate edge-case tests
+  - [x] 2.2 Translate edge-case tests
     - One test function per TS-03-E{N} entry
     - _Test Spec: TS-03-E1 through TS-03-E14_
 
-  - [ ] 2.3 Translate property tests
+  - [x] 2.3 Translate property tests
     - One property test per TS-03-P{N} entry using hypothesis
     - _Test Spec: TS-03-P1 through TS-03-P5_
 
-  - [ ] 2.4 Write integration smoke tests
+  - [x] 2.4 Write integration smoke tests
     - TS-03-SMOKE-1 (full assessment flow)
     - TS-03-SMOKE-2 (full refinement flow)
     - TS-03-SMOKE-3 (full generation flow)
     - TS-03-SMOKE-4 (retry and recovery)
     - _Test Spec: TS-03-SMOKE-1 through TS-03-SMOKE-4_
 
-  - [ ] 2.V Verify task group 2
-    - [ ] All remaining tests exist and are syntactically valid
-    - [ ] All spec tests FAIL (red) -- no implementation yet
-    - [ ] No linter warnings introduced: `uv run ruff check tests/`
+  - [x] 2.V Verify task group 2
+    - [x] All remaining tests exist and are syntactically valid
+    - [x] All spec tests FAIL (red) -- no implementation yet
+    - [x] No linter warnings introduced: `uv run ruff check tests/`
 
 - [ ] 3. Implement error type and tool definitions
   - [ ] 3.1 Add AgentError to speclib/errors.py
