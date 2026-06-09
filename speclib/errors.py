@@ -9,6 +9,14 @@ class ConfigError(SpeclibError):
     """Configuration and authentication errors."""
 
 
+class CampaignError(SpeclibError):
+    """Raised for campaign directory operation failures."""
+
+
+class SessionError(SpeclibError):
+    """Raised for session state machine or persistence failures."""
+
+
 class AgentError(SpeclibError):
     """Error during agent communication or response parsing.
 

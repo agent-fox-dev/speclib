@@ -74,13 +74,13 @@ structure and error hierarchy (`SpeclibError`).
     - [x] All spec tests FAIL (red) — no implementation yet
     - [x] No linter warnings introduced: `uv run ruff check tests/`
 
-- [ ] 3. Implement error types and data models
-  - [ ] 3.1 Add CampaignError and SessionError to speclib/errors.py
+- [x] 3. Implement error types and data models
+  - [x] 3.1 Add CampaignError and SessionError to speclib/errors.py
     - `CampaignError(SpeclibError)` — campaign directory operation failures
     - `SessionError(SpeclibError)` — session state machine or persistence failures
     - _Requirements: 02-REQ-4.3, 02-REQ-1.2, 02-REQ-2.E1_
 
-  - [ ] 3.2 Create speclib/session.py — data models only
+  - [x] 3.2 Create speclib/session.py — data models only
     - `SessionState` enum with six values
     - `Question` dataclass
     - `Assessment` dataclass
@@ -89,20 +89,20 @@ structure and error hierarchy (`SpeclibError`).
     - `GenerateResult` dataclass
     - _Requirements: 02-REQ-4.1, 02-REQ-5.3_
 
-  - [ ] 3.3 Create speclib/campaign.py — CampaignMetadata only
+  - [x] 3.3 Create speclib/campaign.py — CampaignMetadata only
     - `CampaignMetadata` dataclass with name, description, created_at, updated_at
     - _Requirements: 02-REQ-1.3_
 
-  - [ ] 3.4 Update speclib/__init__.py with new exports
+  - [x] 3.4 Update speclib/__init__.py with new exports
     - Export: `CampaignError`, `SessionError`, `SessionState`, `Campaign`, `SpecSession`
     - Export data types: `CampaignMetadata`, `Assessment`, `Question`, `ValidationResult`, `GenerateResult`, `RepairSuggestion`
     - _Requirements: all_
 
-  - [ ] 3.V Verify task group 3
-    - [ ] SessionState enum test passes (TS-02-10)
-    - [ ] Error type tests pass (import and isinstance checks)
-    - [ ] All existing tests still pass: `uv run pytest -q`
-    - [ ] No linter warnings introduced: `uv run ruff check`
+  - [x] 3.V Verify task group 3
+    - [x] SessionState enum test passes (TS-02-10)
+    - [x] Error type tests pass (import and isinstance checks)
+    - [x] All existing tests still pass: `uv run pytest -q`
+    - [x] No linter warnings introduced: `uv run ruff check`
 
 - [ ] 4. Implement Campaign class
   - [ ] 4.1 Implement Campaign.create()
