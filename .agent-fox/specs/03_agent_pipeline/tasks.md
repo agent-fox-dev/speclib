@@ -158,8 +158,8 @@ These must be implemented before task group 3 of this spec.
     - [x] All existing tests still pass: `uv run pytest -q`
     - [x] No linter warnings: `uv run ruff check && uv run mypy speclib/agent.py`
 
-- [ ] 6. Implement SpecAgent — refinement and generation
-  - [ ] 6.1 Implement SpecAgent.refine_prd
+- [x] 6. Implement SpecAgent — refinement and generation
+  - [x] 6.1 Implement SpecAgent.refine_prd
     - Validate answers not empty
     - Validate answer IDs match assessment questions
     - Build messages using refinement prompts
@@ -168,7 +168,7 @@ These must be implemented before task group 3 of this spec.
     - Return (updated_prd, new_assessment)
     - _Requirements: 03-REQ-2.1, 03-REQ-2.2, 03-REQ-2.3, 03-REQ-2.4, 03-REQ-2.5, 03-REQ-2.E1, 03-REQ-2.E2, 03-REQ-2.E3_
 
-  - [ ] 6.2 Implement SpecAgent.generate_artifacts
+  - [x] 6.2 Implement SpecAgent.generate_artifacts
     - Validate prd_text not empty
     - Loop through ["requirements", "test_spec", "tasks"]
     - For each: build messages with prior artifacts as context, call API, extract, validate
@@ -177,13 +177,13 @@ These must be implemented before task group 3 of this spec.
     - Return dict of artifact name to parsed JSON
     - _Requirements: 03-REQ-3.1, 03-REQ-3.2, 03-REQ-3.3, 03-REQ-3.4, 03-REQ-3.5, 03-REQ-3.6, 03-REQ-3.7, 03-REQ-3.8, 03-REQ-3.E1, 03-REQ-3.E2, 03-REQ-3.E3_
 
-  - [ ] 6.V Verify task group 6
-    - [ ] Refinement tests pass: `uv run pytest -q tests/test_agent.py -k refine`
-    - [ ] Generation tests pass: `uv run pytest -q tests/test_agent.py -k generate`
-    - [ ] Edge case tests pass: `uv run pytest -q tests/test_agent.py -k edge`
-    - [ ] Property tests pass: `uv run pytest -q tests/ -k property`
-    - [ ] All existing tests still pass: `uv run pytest -q`
-    - [ ] No linter warnings: `uv run ruff check && uv run mypy speclib/agent.py`
+  - [x] 6.V Verify task group 6
+    - [x] Refinement tests pass: `uv run pytest -q tests/test_agent.py -k refine`
+    - [x] Generation tests pass: `uv run pytest -q tests/test_agent.py -k generate`
+    - [x] Edge case tests pass: `uv run pytest -q tests/test_agent.py -k edge`
+    - [x] Property tests pass: `uv run pytest -q tests/ -k property`
+    - [x] All existing tests still pass: `uv run pytest -q`
+    - [x] No linter warnings: `uv run ruff check && uv run mypy speclib/agent.py`
 
 - [ ] 7. Wire agent into SpecSession
   - [ ] 7.1 Implement SpecSession.assess()
