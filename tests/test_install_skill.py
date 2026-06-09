@@ -76,9 +76,8 @@ class TestInstallCopiesFile:
         self, cli_runner: CliRunner, patched_home: Path
     ) -> None:
         """install-skill copies the skill file when agent CLI is detected."""
-        from speclib.skill import SKILL_FILE_PATH
-
         from speclib.cli import cli
+        from speclib.skill import SKILL_FILE_PATH
 
         (patched_home / ".claude").mkdir()
         result = cli_runner.invoke(cli, ["install-skill"])
@@ -124,9 +123,8 @@ class TestInstallOverwrites:
         self, cli_runner: CliRunner, patched_home: Path
     ) -> None:
         """install-skill overwrites an existing skill file with current content."""
-        from speclib.skill import SKILL_FILE_PATH
-
         from speclib.cli import cli
+        from speclib.skill import SKILL_FILE_PATH
 
         skill_dir = patched_home / ".claude" / "skills"
         skill_dir.mkdir(parents=True)
@@ -257,9 +255,8 @@ class TestProperties:
         Validates: 05-REQ-5.2, 05-REQ-5.4.
         For any target, the installed file is byte-identical to the source.
         """
-        from speclib.skill import SKILL_FILE_PATH
-
         from speclib.cli import cli
+        from speclib.skill import SKILL_FILE_PATH
 
         result = cli_runner.invoke(cli, ["install-skill", "--target", target])
         assert result.exit_code == 0, f"Expected exit code 0, got: {result.output}"
@@ -285,9 +282,8 @@ class TestSmoke:
 
         End-to-end skill installation from package source to agent CLI directory.
         """
-        from speclib.skill import SKILL_FILE_PATH
-
         from speclib.cli import cli
+        from speclib.skill import SKILL_FILE_PATH
 
         (patched_home / ".claude").mkdir()
         result = cli_runner.invoke(cli, ["install-skill"])

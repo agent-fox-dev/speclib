@@ -60,12 +60,12 @@ before the install command, and wiring verification is last.
     - [x] All spec tests FAIL (red) — no implementation yet
     - [x] No linter warnings introduced: `uv run ruff check tests/`
 
-- [ ] 2. Create skill file and package structure
-  - [ ] 2.1 Create speclib/skill/ package
+- [x] 2. Create skill file and package structure
+  - [x] 2.1 Create speclib/skill/ package
     - Create `speclib/skill/__init__.py` with `SKILL_FILE_PATH` constant
     - _Requirements: 05-REQ-1.1_
 
-  - [ ] 2.2 Write the skill prompt file
+  - [x] 2.2 Write the skill prompt file
     - Create `speclib/skill/af-spec.md` with all required sections:
       - Header with skill name, description, trigger conditions
       - Command Reference section with all 9 commands and examples
@@ -77,10 +77,10 @@ before the install command, and wiring verification is last.
       05-REQ-3.1, 05-REQ-3.2, 05-REQ-4.1 through 05-REQ-4.4,
       05-REQ-6.1 through 05-REQ-6.3_
 
-  - [ ] 2.V Verify task group 2
-    - [ ] Skill content tests pass: `uv run pytest -q tests/test_skill.py`
-    - [ ] All existing tests still pass: `uv run pytest -q`
-    - [ ] No linter warnings introduced: `uv run ruff check`
+  - [x] 2.V Verify task group 2
+    - [x] Skill content tests pass: `uv run pytest -q tests/test_skill.py`
+    - [x] All existing tests still pass: `uv run pytest -q`
+    - [x] No linter warnings introduced: `uv run ruff check`
 
 - [ ] 3. Implement install-skill command
   - [ ] 3.1 Implement detect_agent_cli()
