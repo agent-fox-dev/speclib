@@ -7,6 +7,12 @@ from pathlib import Path
 
 import pytest
 
+from tests.conftest_agent import (
+    mock_client,  # noqa: F401
+    sample_assessment,  # noqa: F401
+    sample_questions,  # noqa: F401
+)
+
 
 @pytest.fixture()
 def clean_env(monkeypatch: pytest.MonkeyPatch) -> None:

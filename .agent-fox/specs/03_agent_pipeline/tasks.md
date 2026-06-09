@@ -34,34 +34,34 @@ These must be implemented before task group 3 of this spec.
 
 ## Tasks
 
-- [ ] 1. Write failing spec tests — agent core and prompts/tools
-  - [ ] 1.1 Set up test file structure
+- [x] 1. Write failing spec tests — agent core and prompts/tools
+  - [x] 1.1 Set up test file structure
     - Create `tests/test_agent.py` for SpecAgent tests (TS-03-1 through TS-03-14)
     - Create `tests/test_prompts.py` for prompt template tests (TS-03-15 through TS-03-17)
     - Create `tests/test_tools.py` for tool definition tests (TS-03-18 through TS-03-20)
     - Create `tests/conftest_agent.py` with shared fixtures for mocked Anthropic client and responses
     - _Test Spec: TS-03-1 through TS-03-20_
 
-  - [ ] 1.2 Translate acceptance-criterion tests for agent
+  - [x] 1.2 Translate acceptance-criterion tests for agent
     - One test function per TS-03-{N} entry for N in 1..14
     - Build mock Anthropic client fixtures that return tool_use responses
     - Tests MUST fail (modules don't exist yet)
     - _Test Spec: TS-03-1 through TS-03-14_
 
-  - [ ] 1.3 Translate prompt and tool tests
+  - [x] 1.3 Translate prompt and tool tests
     - One test function per TS-03-{N} entry for N in 15..20
     - Verify prompt content and tool schema structure
     - _Test Spec: TS-03-15 through TS-03-20_
 
-  - [ ] 1.4 Translate retry and error handling tests
+  - [x] 1.4 Translate retry and error handling tests
     - TS-03-21 through TS-03-26
     - Build mock clients that raise various API exceptions
     - _Test Spec: TS-03-21 through TS-03-26_
 
-  - [ ] 1.V Verify task group 1
-    - [ ] All agent core, prompt, and tool tests exist and are syntactically valid
-    - [ ] All spec tests FAIL (red) -- no implementation yet
-    - [ ] No linter warnings introduced: `uv run ruff check tests/`
+  - [x] 1.V Verify task group 1
+    - [x] All agent core, prompt, and tool tests exist and are syntactically valid
+    - [x] All spec tests FAIL (red) -- no implementation yet
+    - [x] No linter warnings introduced: `uv run ruff check tests/`
 
 - [ ] 2. Write failing spec tests — session integration, edge cases, properties, smoke
   - [ ] 2.1 Translate session integration tests
