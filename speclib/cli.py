@@ -158,7 +158,8 @@ def _read_session_data(spec_dir: Path) -> dict[str, Any]:
     session_file = spec_dir / "_session.json"
     if session_file.exists():
         try:
-            return json.loads(session_file.read_text())
+            data: dict[str, Any] = json.loads(session_file.read_text())
+            return data
         except json.JSONDecodeError:
             return {"state": "unknown"}
     return {"state": "unknown"}
@@ -320,7 +321,7 @@ def assess_cmd(ctx: click.Context, spec: str) -> None:
         campaign = resolve_campaign(campaign_dir)
         spec_dir = resolve_spec(campaign, spec)
         session = SpecSession.resume(spec_dir)
-        assessment = asyncio.run(session.assess())
+        assessment: Any = asyncio.run(session.assess())  # type: ignore[arg-type]
         click.echo(format_assessment(assessment))
     except (CampaignError, SessionError) as exc:
         click.echo(f"Error: {exc}", err=True)
@@ -364,7 +365,7 @@ def refine_cmd(ctx: click.Context, spec: str, answers: str) -> None:
         campaign = resolve_campaign(campaign_dir)
         spec_dir = resolve_spec(campaign, spec)
         session = SpecSession.resume(spec_dir)
-        assessment = asyncio.run(session.refine(answers_data))
+        assessment: Any = asyncio.run(session.refine(answers_data))  # type: ignore[arg-type]
         click.echo(format_assessment(assessment))
     except (CampaignError, SessionError) as exc:
         click.echo(f"Error: {exc}", err=True)
@@ -409,7 +410,7 @@ def generate_cmd(ctx: click.Context, spec: str) -> None:
         campaign = resolve_campaign(campaign_dir)
         spec_dir = resolve_spec(campaign, spec)
         session = SpecSession.resume(spec_dir)
-        gen_result = asyncio.run(session.generate())
+        gen_result: Any = asyncio.run(session.generate())  # type: ignore[arg-type]
 
         if isinstance(gen_result, dict):
             artifacts = gen_result.get("artifacts", [])

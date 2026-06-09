@@ -286,9 +286,9 @@ wiring verification.
     - [x] All existing tests still pass: `uv run pytest -q`
     - [x] No linter warnings: `uv run ruff check speclib/cli.py`
 
-- [ ] 7. Wiring verification
+- [x] 7. Wiring verification
 
-  - [ ] 7.1 Trace every execution path from design.md end-to-end
+  - [x] 7.1 Trace every execution path from design.md end-to-end
     - Path 1: init → Campaign.create → confirmation
     - Path 2: list → Campaign.open → specs → sessions → table
     - Path 3: new → Campaign.open → new_spec → confirmation
@@ -303,43 +303,43 @@ wiring verification.
     - Verify each function in the chain is actually called
     - _Requirements: all_
 
-  - [ ] 7.2 Verify Click decorators and help text
+  - [x] 7.2 Verify Click decorators and help text
     - `af-spec --help` lists all subcommands
     - Each subcommand has `--help` producing correct usage
     - `--campaign-dir` appears in group help
     - _Requirements: all_
 
-  - [ ] 7.3 Verify error message quality
+  - [x] 7.3 Verify error message quality
     - Every error path includes an actionable suggestion
     - No raw tracebacks in normal error paths
     - State errors name current and required states
     - Not-found errors list available options
     - _Requirements: 04-REQ-CC.3, 04-REQ-CC.5, 04-REQ-4.3, 04-REQ-5.4, 04-REQ-6.2, 04-REQ-7.3_
 
-  - [ ] 7.4 Run the integration smoke tests
+  - [x] 7.4 Run the integration smoke tests
     - All TS-04-SMOKE-* tests pass with real components
     - _Test Spec: TS-04-SMOKE-1 through TS-04-SMOKE-4_
 
-  - [ ] 7.5 Stub / dead-code audit
+  - [x] 7.5 Stub / dead-code audit
     - Search speclib/cli.py for `pass`, `# TODO`, `NotImplementedError`, `return None`
     - Each hit must be justified or replaced
     - No placeholder implementations remaining
 
-  - [ ] 7.6 Cross-spec entry point verification
+  - [x] 7.6 Cross-spec entry point verification
     - Verify spec 01 stub `speclib/cli.py:main` is fully replaced
     - Verify `af-spec --help` works after `uv sync`
     - Verify all 11 subcommands appear in help output
     - _Requirements: all_
 
-  - [ ] 7.V Verify wiring group
-    - [ ] All smoke tests pass
-    - [ ] No unjustified stubs remain in speclib/cli.py
-    - [ ] All execution paths from design.md are live
-    - [ ] All 51 unit tests pass
-    - [ ] All 5 property tests pass
-    - [ ] All 4 smoke tests pass
-    - [ ] All existing tests still pass: `uv run pytest -q`
-    - [ ] No linter warnings: `uv run ruff check && uv run mypy speclib/`
+  - [x] 7.V Verify wiring group
+    - [x] All smoke tests pass
+    - [x] No unjustified stubs remain in speclib/cli.py
+    - [x] All execution paths from design.md are live
+    - [x] All 51 unit tests pass
+    - [x] All 5 property tests pass
+    - [x] All 4 smoke tests pass
+    - [x] All existing tests still pass: `uv run pytest -q`
+    - [x] No linter warnings: `uv run ruff check && uv run mypy speclib/`
 
 ## Traceability
 
