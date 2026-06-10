@@ -24,8 +24,8 @@ using the `jsonschema` library. Then removes the graceful skip in
 
 ## Tasks
 
-- [ ] 1. Write failing spec tests
-  - [ ] 1.1 Create `tests/test_afspec_validation.py`
+- [x] 1. Write failing spec tests
+  - [x] 1.1 Create `tests/test_afspec_validation.py`
     - Test `validate_artifact` is importable (TS-08-1)
     - Test valid content passes (TS-08-2)
     - Test invalid content raises ValidationError (TS-08-3)
@@ -34,27 +34,27 @@ using the `jsonschema` library. Then removes the graceful skip in
     - Test ValidationError attributes (TS-08-7)
     - _Test Spec: TS-08-1 through TS-08-5, TS-08-7_
 
-  - [ ] 1.2 Add edge case tests
+  - [x] 1.2 Add edge case tests
     - Test unknown artifact name raises ValueError (TS-08-E1)
     - Test empty dict fails required fields (TS-08-E2)
     - _Test Spec: TS-08-E1, TS-08-E2_
 
-  - [ ] 1.3 Add property tests
+  - [x] 1.3 Add property tests
     - Valid content passes (TS-08-P1)
     - Invalid content fails (TS-08-P2)
     - Name-schema bijection (TS-08-P3)
     - Error detail preservation (TS-08-P4)
     - _Test Spec: TS-08-P1 through TS-08-P4_
 
-  - [ ] 1.4 Add agent wrapper test and smoke test
+  - [x] 1.4 Add agent wrapper test and smoke test
     - Test agent wrapper calls afspec directly (TS-08-6)
     - End-to-end smoke test (TS-08-SMOKE-1)
     - _Test Spec: TS-08-6, TS-08-SMOKE-1_
 
-  - [ ] 1.V Verify task group 1
-    - [ ] All spec tests exist and are syntactically valid
-    - [ ] All spec tests FAIL (red) — no implementation yet
-    - [ ] No linter warnings introduced: `uv run ruff check tests/`
+  - [x] 1.V Verify task group 1
+    - [x] All spec tests exist and are syntactically valid
+    - [x] All spec tests FAIL (red) — no implementation yet
+    - [x] No linter warnings introduced: `uv run ruff check tests/`
 
 - [ ] 2. Bundle JSON schemas
   - [ ] 2.1 Copy schema files from speclib-python
