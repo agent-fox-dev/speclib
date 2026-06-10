@@ -1148,6 +1148,218 @@ class TestRefineCommand:
 
 
 # ================================================================
+# Spec 06: Refine question export tests
+# ================================================================
+
+
+class TestRefineQuestionExport:
+    """Tests for refine without --answers (question export)."""
+
+    def test_refine_no_answers_outputs_json(
+        self,
+        cli_runner: CliRunner,
+        campaign_dir_with_specs: Path,
+    ) -> None:
+        """TS-06-1: Refine without --answers outputs valid JSON.
+
+        Requirement: 06-REQ-1.1
+        """
+        with patch("speclib.cli.SpecSession") as mock_cls:
+            session = _mock_session(state="assessing")
+            session._assessment_history = [{"questions": []}]
+            session.pending_questions.return_value = [
+                {
+                    "id": "q1",
+                    "text": "What scope?",
+                    "context": "Clarify",
+                    "options": ["A", "B"],
+                    "required": True,
+                },
+            ]
+            mock_cls.resume.return_value = session
+            result = cli_runner.invoke(
+                main,
+                [
+                    "--campaign-dir",
+                    str(campaign_dir_with_specs),
+                    "refine",
+                    "01",
+                ],
+            )
+        _assert_exit(result, 0)
+        data = json.loads(result.output)
+        assert "questions" in data
+        assert "answers" in data
+
+    def test_refine_no_answers_question_fields(
+        self,
+        cli_runner: CliRunner,
+        campaign_dir_with_specs: Path,
+    ) -> None:
+        """TS-06-2: Each question has all required fields.
+
+        Requirement: 06-REQ-1.2
+        """
+        questions = [
+            {
+                "id": "q1",
+                "text": "What?",
+                "context": "Why",
+                "options": ["X"],
+                "required": True,
+            },
+            {
+                "id": "q2",
+                "text": "How?",
+                "context": "Detail",
+                "options": [],
+                "required": False,
+            },
+        ]
+        with patch("speclib.cli.SpecSession") as mock_cls:
+            session = _mock_session(state="assessing")
+            session._assessment_history = [{"questions": []}]
+            session.pending_questions.return_value = questions
+            mock_cls.resume.return_value = session
+            result = cli_runner.invoke(
+                main,
+                [
+                    "--campaign-dir",
+                    str(campaign_dir_with_specs),
+                    "refine",
+                    "01",
+                ],
+            )
+        _assert_exit(result, 0)
+        data = json.loads(result.output)
+        for q in data["questions"]:
+            assert {"id", "text", "context", "options", "required"} <= set(
+                q.keys()
+            )
+
+    def test_refine_no_answers_template(
+        self,
+        cli_runner: CliRunner,
+        campaign_dir_with_specs: Path,
+    ) -> None:
+        """TS-06-3: Answers template maps question IDs to empty strings.
+
+        Requirement: 06-REQ-1.3
+        """
+        questions = [
+            {
+                "id": "q1", "text": "Q1?", "context": "C",
+                "options": [], "required": True,
+            },
+            {
+                "id": "q2", "text": "Q2?", "context": "C",
+                "options": [], "required": False,
+            },
+        ]
+        with patch("speclib.cli.SpecSession") as mock_cls:
+            session = _mock_session(state="assessing")
+            session._assessment_history = [{"questions": []}]
+            session.pending_questions.return_value = questions
+            mock_cls.resume.return_value = session
+            result = cli_runner.invoke(
+                main,
+                [
+                    "--campaign-dir",
+                    str(campaign_dir_with_specs),
+                    "refine",
+                    "01",
+                ],
+            )
+        _assert_exit(result, 0)
+        data = json.loads(result.output)
+        question_ids = {q["id"] for q in data["questions"]}
+        assert set(data["answers"].keys()) == question_ids
+        assert all(v == "" for v in data["answers"].values())
+
+    def test_refine_with_answers_unchanged(
+        self,
+        cli_runner: CliRunner,
+        campaign_dir_with_specs: Path,
+        answers_file: Path,
+    ) -> None:
+        """TS-06-4: Refine with --answers still works as before.
+
+        Requirement: 06-REQ-1.4
+        """
+        assessment = _sample_assessment()
+        with patch("speclib.cli.SpecSession") as mock_cls:
+            session = _mock_session(state="refining")
+            session.refine = AsyncMock(return_value=assessment)
+            mock_cls.resume.return_value = session
+            result = cli_runner.invoke(
+                main,
+                [
+                    "--campaign-dir",
+                    str(campaign_dir_with_specs),
+                    "refine",
+                    "01",
+                    "--answers",
+                    str(answers_file),
+                ],
+            )
+        _assert_exit(result, 0)
+        session.refine.assert_called_once()
+
+    def test_refine_no_answers_no_assessment(
+        self,
+        cli_runner: CliRunner,
+        campaign_dir_with_specs: Path,
+    ) -> None:
+        """TS-06-E1: Error when no assessment exists.
+
+        Requirement: 06-REQ-1.E1
+        """
+        with patch("speclib.cli.SpecSession") as mock_cls:
+            session = _mock_session(state="init")
+            session._assessment_history = []
+            session.pending_questions.return_value = []
+            mock_cls.resume.return_value = session
+            result = cli_runner.invoke(
+                main,
+                [
+                    "--campaign-dir",
+                    str(campaign_dir_with_specs),
+                    "refine",
+                    "01",
+                ],
+            )
+        _assert_exit(result, 1)
+
+    def test_refine_no_answers_zero_questions(
+        self,
+        cli_runner: CliRunner,
+        campaign_dir_with_specs: Path,
+    ) -> None:
+        """TS-06-E2: Output with zero questions in assessment.
+
+        Requirement: 06-REQ-1.E2
+        """
+        with patch("speclib.cli.SpecSession") as mock_cls:
+            session = _mock_session(state="assessing")
+            session._assessment_history = [{"questions": []}]
+            session.pending_questions.return_value = []
+            mock_cls.resume.return_value = session
+            result = cli_runner.invoke(
+                main,
+                [
+                    "--campaign-dir",
+                    str(campaign_dir_with_specs),
+                    "refine",
+                    "01",
+                ],
+            )
+        _assert_exit(result, 0)
+        data = json.loads(result.output)
+        assert data["questions"] == []
+        assert data["answers"] == {}
+
+
+# ================================================================
 # Task 2.3: Accept, generate, validate, render, show, status tests
 #            (TS-04-27 through TS-04-43)
 # ================================================================

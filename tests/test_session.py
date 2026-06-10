@@ -712,3 +712,131 @@ class TestSessionSmokeTests:
 
             individual = session.render(combined=False)
             assert isinstance(individual, dict)
+
+
+# ---------------------------------------------------------------------------
+# pending_questions tests: TS-06 spec
+# ---------------------------------------------------------------------------
+
+
+class TestPendingQuestions:
+    """Tests for SpecSession.pending_questions()."""
+
+    def test_pending_questions_returns_dicts(self, tmp_path: Path) -> None:
+        """TS-06-P2 (partial): pending_questions returns list of dicts with
+        correct keys from latest assessment.
+
+        Requirement: 06-REQ-2.1
+        """
+        session = _create_session(tmp_path, SessionState.ASSESSING)
+        session_file = session.spec_dir / "_session.json"
+        data = json.loads(session_file.read_text())
+        data["assessment_history"] = [
+            {
+                "quality": "needs_refinement",
+                "summary": "Needs work",
+                "gaps": [],
+                "questions": [
+                    {
+                        "id": "q1",
+                        "text": "What scope?",
+                        "context": "Clarify scope",
+                        "options": ["A", "B"],
+                        "required": True,
+                    },
+                    {
+                        "id": "q2",
+                        "text": "Which DB?",
+                        "context": "Pick database",
+                        "options": [],
+                        "required": False,
+                    },
+                ],
+            }
+        ]
+        session_file.write_text(json.dumps(data))
+        session = SpecSession.resume(session.spec_dir)
+
+        result = session.pending_questions()
+
+        assert len(result) == 2
+        assert all(isinstance(q, dict) for q in result)
+        for q in result:
+            assert set(q.keys()) == {"id", "text", "context", "options", "required"}
+        assert result[0]["id"] == "q1"
+        assert result[0]["text"] == "What scope?"
+        assert result[0]["options"] == ["A", "B"]
+        assert result[0]["required"] is True
+        assert result[1]["id"] == "q2"
+
+    def test_pending_questions_empty_history(self, tmp_path: Path) -> None:
+        """TS-06-P2 (partial): pending_questions returns empty list when
+        no assessment exists.
+
+        Requirement: 06-REQ-2.2
+        """
+        session = _create_session(tmp_path, SessionState.INIT)
+        result = session.pending_questions()
+        assert result == []
+
+    def test_pending_questions_defaults(self, tmp_path: Path) -> None:
+        """TS-06-E3: pending_questions uses defaults for missing optional fields.
+
+        Requirement: 06-REQ-2.E1
+        """
+        session = _create_session(tmp_path, SessionState.ASSESSING)
+        session_file = session.spec_dir / "_session.json"
+        data = json.loads(session_file.read_text())
+        data["assessment_history"] = [
+            {
+                "quality": "needs_refinement",
+                "summary": "Needs work",
+                "gaps": [],
+                "questions": [
+                    {
+                        "id": "q1",
+                        "text": "Question?",
+                        "context": "Context",
+                    }
+                ],
+            }
+        ]
+        session_file.write_text(json.dumps(data))
+        session = SpecSession.resume(session.spec_dir)
+
+        result = session.pending_questions()
+        assert result[0]["options"] == []
+        assert result[0]["required"] is False
+
+    def test_pending_questions_read_only(self, tmp_path: Path) -> None:
+        """TS-06-P3: pending_questions does not modify session state.
+
+        Requirement: 06-REQ-2.3
+        """
+        session = _create_session(tmp_path, SessionState.ASSESSING)
+        session_file = session.spec_dir / "_session.json"
+        data = json.loads(session_file.read_text())
+        data["assessment_history"] = [
+            {
+                "quality": "needs_refinement",
+                "summary": "S",
+                "gaps": [],
+                "questions": [
+                    {
+                        "id": "q1", "text": "Q?", "context": "C",
+                        "options": [], "required": True,
+                    }
+                ],
+            }
+        ]
+        session_file.write_text(json.dumps(data))
+        session = SpecSession.resume(session.spec_dir)
+
+        state_before = session.state
+        history_before = json.loads(session_file.read_text())
+
+        session.pending_questions()
+
+        assert session.state == state_before
+        history_after = json.loads(session_file.read_text())
+        assert history_before == history_after

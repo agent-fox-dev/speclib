@@ -455,6 +455,26 @@ class SpecSession:
             questions=questions,
         )
 
+    def pending_questions(self) -> list[dict[str, Any]]:
+        """Return questions from the latest assessment as serializable dicts.
+
+        Returns an empty list if no assessment exists. Does not trigger
+        a state transition.
+        """
+        if not self._assessment_history:
+            return []
+        last = self._assessment_history[-1]
+        return [
+            {
+                "id": q["id"],
+                "text": q["text"],
+                "context": q["context"],
+                "options": q.get("options", []),
+                "required": q.get("required", False),
+            }
+            for q in last.get("questions", [])
+        ]
+
     def _check_transition(
         self,
         method: str,

@@ -335,15 +335,43 @@ def assess_cmd(ctx: click.Context, spec: str) -> None:
 @click.argument("spec")
 @click.option(
     "--answers",
-    required=True,
+    required=False,
+    default=None,
     type=click.Path(exists=True),
-    help="JSON file with answers to assessment questions",
+    help="JSON file with answers to assessment questions. "
+    "Omit to output pending questions as JSON.",
 )
 @click.pass_context
-def refine_cmd(ctx: click.Context, spec: str, answers: str) -> None:
-    """Submit answers and update PRD."""
+def refine_cmd(
+    ctx: click.Context, spec: str, answers: str | None
+) -> None:
+    """Submit answers and update PRD.
+
+    Without --answers, outputs pending questions as JSON to stdout.
+    """
     try:
-        # Validate answers file before resolving campaign / spec.
+        campaign_dir = ctx.obj["campaign_dir"]
+        campaign = resolve_campaign(campaign_dir)
+        spec_dir = resolve_spec(campaign, spec)
+        session = SpecSession.resume(spec_dir)
+
+        if answers is None:
+            questions = session.pending_questions()
+            if not session._assessment_history:
+                click.echo(
+                    "Error: No assessment exists for this spec. "
+                    "Run 'assess' first.",
+                    err=True,
+                )
+                sys.exit(1)
+            output = {
+                "questions": questions,
+                "answers": {q["id"]: "" for q in questions},
+            }
+            click.echo(json.dumps(output, indent=2))
+            return
+
+        # Validate answers file before calling refine.
         answers_path = Path(answers)
         try:
             answers_data = json.loads(answers_path.read_text())
@@ -361,10 +389,6 @@ def refine_cmd(ctx: click.Context, spec: str, answers: str) -> None:
             )
             sys.exit(1)
 
-        campaign_dir = ctx.obj["campaign_dir"]
-        campaign = resolve_campaign(campaign_dir)
-        spec_dir = resolve_spec(campaign, spec)
-        session = SpecSession.resume(spec_dir)
         assessment: Any = asyncio.run(session.refine(answers_data))  # type: ignore[arg-type]
         click.echo(format_assessment(assessment))
     except (CampaignError, SessionError) as exc:
