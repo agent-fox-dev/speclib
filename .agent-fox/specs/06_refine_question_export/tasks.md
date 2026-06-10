@@ -57,15 +57,15 @@ plus one test file.
     - [x] All spec tests PASS (implementation already existed)
     - [x] No linter warnings introduced: `uv run ruff check tests/`
 
-- [ ] 2. Implement `pending_questions()` and CLI question export
-  - [ ] 2.1 Add `pending_questions()` method to `SpecSession`
+- [x] 2. Implement `pending_questions()` and CLI question export
+  - [x] 2.1 Add `pending_questions()` method to `SpecSession`
     - Read-only method, no state transition
     - Returns `list[dict[str, Any]]` from latest assessment
     - Returns empty list when no assessment history
     - Uses defaults for missing optional fields (matches `assessment` property)
     - _Requirements: 06-REQ-2.1, 06-REQ-2.2, 06-REQ-2.3, 06-REQ-2.E1_
 
-  - [ ] 2.2 Modify `refine_cmd` CLI handler
+  - [x] 2.2 Modify `refine_cmd` CLI handler
     - Change `--answers` from `required=True` to `required=False`
     - When `answers is None`: call `pending_questions()`, build JSON output,
       print to stdout
@@ -74,11 +74,11 @@ plus one test file.
     - _Requirements: 06-REQ-1.1, 06-REQ-1.2, 06-REQ-1.3, 06-REQ-1.4,
       06-REQ-1.E1, 06-REQ-1.E2_
 
-  - [ ] 2.V Verify task group 2
-    - [ ] Spec tests for this group pass: `uv run pytest -q tests/test_cli.py tests/test_session.py -k "refine or pending_questions"`
-    - [ ] All existing tests still pass: `uv run pytest -q`
-    - [ ] No linter warnings introduced: `uv run ruff check speclib/ tests/`
-    - [ ] Requirements 06-REQ-1.*, 06-REQ-2.* acceptance criteria met
+  - [x] 2.V Verify task group 2
+    - [x] Spec tests for this group pass: `uv run pytest -q tests/test_cli.py tests/test_session.py -k "refine or pending_questions"`
+    - [x] All existing tests still pass: `uv run pytest -q`
+    - [x] No linter warnings introduced: `uv run ruff check speclib/ tests/`
+    - [x] Requirements 06-REQ-1.*, 06-REQ-2.* acceptance criteria met
 
 - [ ] 3. Wiring verification
   - [ ] 3.1 Trace every execution path from design.md end-to-end
