@@ -58,13 +58,13 @@ during `SpecSession.refine()`. The change is confined to `speclib/session.py`
     - [x] All spec tests FAIL (red) — no implementation yet
     - [x] No linter warnings introduced: `uv run ruff check tests/`
 
-- [ ] 2. Implement QA exchange recording in `SpecSession.refine()`
-  - [ ] 2.1 Add `_utcnow()` module-level function to `speclib/session.py`
+- [x] 2. Implement QA exchange recording in `SpecSession.refine()`
+  - [x] 2.1 Add `_utcnow()` module-level function to `speclib/session.py`
     - Returns `datetime.now(timezone.utc).isoformat()`
     - Exists solely to be patchable in tests
     - _Requirements: 07-REQ-2.2_
 
-  - [ ] 2.2 Modify `SpecSession.refine()` to record answers
+  - [x] 2.2 Modify `SpecSession.refine()` to record answers
     - Capture `assessment_index = len(self._assessment_history) - 1` and
       `timestamp = _utcnow()` before the agent call
     - On success (after agent returns), append QA exchange entry to
@@ -72,11 +72,11 @@ during `SpecSession.refine()`. The change is confined to `speclib/session.py`
     - On failure (AgentError), do NOT append — existing error path unchanged
     - _Requirements: 07-REQ-1.1, 07-REQ-1.2, 07-REQ-1.3, 07-REQ-1.E1_
 
-  - [ ] 2.V Verify task group 2
-    - [ ] Spec tests pass: `uv run pytest -q tests/test_session.py -k "qa_exchange"`
-    - [ ] All existing tests still pass: `uv run pytest -q`
-    - [ ] No linter warnings introduced: `uv run ruff check speclib/ tests/`
-    - [ ] Requirements 07-REQ-1.*, 07-REQ-2.*, 07-REQ-3.* met
+  - [x] 2.V Verify task group 2
+    - [x] Spec tests pass: `uv run pytest -q tests/test_session.py -k "qa_exchange"`
+    - [x] All existing tests still pass: `uv run pytest -q`
+    - [x] No linter warnings introduced: `uv run ruff check speclib/ tests/`
+    - [x] Requirements 07-REQ-1.*, 07-REQ-2.*, 07-REQ-3.* met
 
 - [ ] 3. Wiring verification
   - [ ] 3.1 Trace every execution path from design.md end-to-end

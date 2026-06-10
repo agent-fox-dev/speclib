@@ -257,6 +257,9 @@ class SpecSession:
         if previous_assessment is None:
             raise AgentError("Cannot refine without a previous assessment")
 
+        assessment_index = len(self._assessment_history) - 1
+        timestamp = _utcnow()
+
         agent = _create_agent()
 
         try:
@@ -270,6 +273,13 @@ class SpecSession:
 
         # Update PRD file with the revised text
         (self._spec_dir / self._prd_path).write_text(updated_prd)
+
+        # Record the QA exchange (07-REQ-1.1)
+        self._qa_exchanges.append({
+            "assessment_index": assessment_index,
+            "answers": dict(answers),
+            "timestamp": timestamp,
+        })
 
         self._assessment_history.append(
             _assessment_to_dict(new_assessment)
@@ -554,6 +564,13 @@ class SpecSession:
 # ---------------------------------------------------------------------------
 # Module-level helpers
 # ---------------------------------------------------------------------------
+
+
+def _utcnow() -> str:
+    """Return current UTC time as ISO 8601 string. Patchable in tests."""
+    from datetime import datetime, timezone
+
+    return datetime.now(timezone.utc).isoformat()
 
 
 def _create_agent() -> SpecAgent:

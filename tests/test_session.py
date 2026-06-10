@@ -1442,7 +1442,7 @@ class TestQAExchangeProperties:
                 patch("speclib.session.SpecAgent", return_value=mock_agent),
                 patch("speclib.session.create_client", return_value=MagicMock()),
             ):
-                asyncio.get_event_loop().run_until_complete(
+                _run_sync(
                     session.refine({f"q{i}": f"answer{i}"})
                 )
 
@@ -1483,7 +1483,7 @@ class TestQAExchangeProperties:
                 patch("speclib.session.SpecAgent", return_value=mock_agent),
                 patch("speclib.session.create_client", return_value=MagicMock()),
             ):
-                asyncio.get_event_loop().run_until_complete(
+                _run_sync(
                     session.refine({f"q{i}": f"a{i}"})
                 )
 
@@ -1526,7 +1526,7 @@ class TestQAExchangeProperties:
                 patch("speclib.session.SpecAgent", return_value=mock_agent),
                 patch("speclib.session.create_client", return_value=MagicMock()),
             ):
-                asyncio.get_event_loop().run_until_complete(
+                _run_sync(
                     session.refine({f"q{i}": f"a{i}"})
                 )
 
@@ -1572,7 +1572,7 @@ class TestQAExchangeProperties:
                 patch("speclib.session.SpecAgent", return_value=mock_agent),
                 patch("speclib.session.create_client", return_value=MagicMock()),
             ):
-                asyncio.get_event_loop().run_until_complete(
+                _run_sync(
                     session.refine({f"q{i}": f"a{i}"})
                 )
 
@@ -1588,7 +1588,7 @@ class TestQAExchangeProperties:
             patch("speclib.session.create_client", return_value=MagicMock()),
         ):
             with pytest.raises(AgentError):
-                asyncio.get_event_loop().run_until_complete(
+                _run_sync(
                     session.refine({f"q{n}": "a"})
                 )
 
