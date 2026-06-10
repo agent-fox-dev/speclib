@@ -56,8 +56,8 @@ using the `jsonschema` library. Then removes the graceful skip in
     - [x] All spec tests FAIL (red) — no implementation yet
     - [x] No linter warnings introduced: `uv run ruff check tests/`
 
-- [ ] 2. Bundle JSON schemas
-  - [ ] 2.1 Copy schema files from speclib-python
+- [x] 2. Bundle JSON schemas
+  - [x] 2.1 Copy schema files from speclib-python
     - Copy `requirements.v1.json`, `test_spec.v1.json`, `tasks.v1.json`
       from `~/devel/workspace/speclib-python/afspec/schemas/` to
       `packages/afspec/afspec/schemas/`
@@ -65,15 +65,15 @@ using the `jsonschema` library. Then removes the graceful skip in
       schema loading helper)
     - _Requirements: 08-REQ-2.1, 08-REQ-2.2_
 
-  - [ ] 2.2 Add `jsonschema` dependency to stub package
+  - [x] 2.2 Add `jsonschema` dependency to stub package
     - Update `packages/afspec/pyproject.toml` to add `jsonschema` dep
     - Run `uv sync` to install
     - _Requirements: 08-REQ-1.3_
 
-  - [ ] 2.V Verify task group 2
-    - [ ] Schema files exist and parse as valid JSON
-    - [ ] `jsonschema` is importable: `uv run python -c "import jsonschema"`
-    - [ ] No linter warnings introduced
+  - [x] 2.V Verify task group 2
+    - [x] Schema files exist and parse as valid JSON
+    - [x] `jsonschema` is importable: `uv run python -c "import jsonschema"`
+    - [x] No linter warnings introduced
 
 - [ ] 3. Implement validate_artifact and wire into agent
   - [ ] 3.1 Create `packages/afspec/afspec/validation.py`

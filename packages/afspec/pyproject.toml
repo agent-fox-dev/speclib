@@ -3,7 +3,7 @@ name = "afspec"
 version = "0.1.0"
 description = "Spec format models, validation, rendering, and I/O (stub)"
 requires-python = ">=3.14"
-dependencies = []
+dependencies = ["jsonschema>=4.0"]
 
 [build-system]
 requires = ["hatchling"]
