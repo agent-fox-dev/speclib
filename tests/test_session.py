@@ -421,6 +421,7 @@ _LEGAL_TRANSITIONS: dict[tuple[str, str], str] = {
     ("init", "assess"): "assessing",
     ("assessing", "refine"): "refining",
     ("assessing", "accept_prd"): "prd_accepted",
+    ("refining", "refine"): "refining",
     ("refining", "assess"): "assessing",
     ("refining", "accept_prd"): "prd_accepted",
     ("prd_accepted", "generate"): "generating",

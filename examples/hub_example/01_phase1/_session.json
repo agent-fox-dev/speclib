@@ -1,5 +1,5 @@
 {
-  "state": "assessing",
+  "state": "refining",
   "prd_path": "prd.md",
   "assessment_history": [
     {
@@ -111,10 +111,66 @@
           "required": false
         }
       ]
+    },
+    {
+      "quality": "needs_refinement",
+      "summary": "The PRD has been substantially improved by incorporating all eight answers. It now has a clear Intent statement, a Goals section, a Non-Goals section, a defined multi-tenancy model, an OAuth identity-federation rule, a specified API key rotation model, an enumerated CLI command list, and security requirements for key storage. The document is close to spec-quality but still has a small number of gaps that should be resolved before engineering work begins: the PRD owner is still unassigned, performance/availability SLOs are absent, the bootstrap token delivery and rotation API are only partially specified, and there are no explicit API versioning or error-format conventions stated.",
+      "gaps": [
+        "Owner field is still empty \u2014 no accountable person is named for this PRD.",
+        "No performance or availability SLOs are defined (e.g. p99 latency target, uptime expectation) \u2014 the only acceptance criterion is 'all endpoints are implemented and end-to-end tested', which is a completeness criterion, not a quality bar.",
+        "Bootstrap token rotation via the API is mentioned but the specific endpoint or CLI command for rotating it is not defined \u2014 engineers will need to infer or guess the interface.",
+        "TLS enforcement is stated as a requirement for 'production deployments' but there is no definition of what constitutes a production deployment or how dev/staging environments should handle this.",
+        "No API versioning strategy is stated (e.g. /v1/ prefix, header-based versioning) \u2014 this affects how future phases add endpoints without breaking Phase 1 clients.",
+        "No error response format is defined \u2014 returning 401 is specified, but the body format (JSON schema, error codes) for all error responses is absent.",
+        "Minimum key entropy is specified (256 bits) but the encoding format for the plaintext key shown to the user is not defined (e.g. base64url, hex, random string).",
+        "The 'update key' endpoint semantics (e.g. can only expiry be extended, or can other attributes change?) and who is authorized to call it (owner only, admin?) are unspecified."
+      ],
+      "questions": [
+        {
+          "id": "q9",
+          "text": "Who is the owner / DRI (Directly Responsible Individual) for this PRD?",
+          "context": "The owner field is empty. Accountability is required for spec-format compliance and for escalation paths during implementation.",
+          "options": [],
+          "required": true
+        },
+        {
+          "id": "q10",
+          "text": "Are there any performance or availability targets for Phase 1? For example: 'API endpoints must respond within 500 ms at p99', 'the service must tolerate X requests/second', or 'no formal SLO for Phase 1 \u2014 best effort only'.",
+          "context": "Without at least a minimal performance expectation, QA cannot define load tests and infrastructure sizing is unconstrained.",
+          "options": [
+            "No formal SLO for Phase 1 \u2014 best effort only",
+            "p99 latency < 500 ms for all API endpoints under normal load",
+            "Custom target (please specify)"
+          ],
+          "required": false
+        },
+        {
+          "id": "q11",
+          "text": "What API versioning strategy should be used? Should all Phase 1 endpoints be prefixed with /v1/, use a header-based version, or have no versioning scheme yet?",
+          "context": "An agreed versioning strategy prevents breaking changes when Phase 2 endpoints are added and ensures CLI and AF-instance clients can target a stable surface.",
+          "options": [
+            "/v1/ URL prefix for all endpoints",
+            "Accept-Version / API-Version header",
+            "No versioning in Phase 1 \u2014 defer to a future phase"
+          ],
+          "required": false
+        },
+        {
+          "id": "q12",
+          "text": "What should the standard error response body look like? For example: { \"error\": \"string\", \"code\": \"string\" } or simply an HTTP status code with no body?",
+          "context": "A consistent error format is needed for CLI error handling, AF-instance retry logic, and future API consumers. Defining it now avoids divergence across endpoints.",
+          "options": [
+            "{ \"error\": \"<human-readable message>\", \"code\": \"<machine-readable code>\" }",
+            "HTTP status code only, no body",
+            "RFC 7807 Problem Details format",
+            "Custom format (please specify)"
+          ],
+          "required": false
+        }
+      ]
     }
   ],
   "qa_exchanges": [],
   "generated_artifacts": [],
-  "mode": "interactive",
-  "last_error": "Unrecognized question IDs in answers: answers, questions"
+  "mode": "interactive"
 }

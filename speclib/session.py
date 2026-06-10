@@ -248,7 +248,9 @@ class SpecSession:
             AgentError: If the API call fails or the response cannot
                 be parsed.
         """
-        self._check_transition("refine", required_states=("assessing",))
+        self._check_transition(
+            "refine", required_states=("assessing", "refining")
+        )
 
         prd_text = (self._spec_dir / self._prd_path).read_text()
         previous_assessment = self.assessment
