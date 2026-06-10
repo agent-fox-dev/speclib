@@ -211,7 +211,12 @@ def generation_user_prompt(
             "domain-specific terms used in backtick-delimited references "
             "within acceptance criteria, edge cases, and correctness "
             "properties. Every backtick-wrapped term that carries domain "
-            "meaning must have a glossary entry.\n"
+            "meaning must have a glossary entry.\n\n"
+            "The `glossary` value must be a flat JSON object mapping term "
+            "strings to definition strings, e.g. "
+            '`{"bootstrap token": "The long-lived API key...", '
+            '"API key": "A time-bound credential..."}`. '
+            "Do NOT use an array of objects.\n"
         )
     elif artifact_name == "test_spec":
         parts.append(
