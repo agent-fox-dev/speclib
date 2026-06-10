@@ -252,6 +252,8 @@ class SpecSession:
 
         prd_text = (self._spec_dir / self._prd_path).read_text()
         previous_assessment = self.assessment
+        if previous_assessment is None:
+            raise AgentError("Cannot refine without a previous assessment")
 
         agent = _create_agent()
 

@@ -220,9 +220,9 @@ These must be implemented before task group 3 of this spec.
     - [x] All existing tests still pass: `uv run pytest -q`
     - [x] No linter warnings: `uv run ruff check && uv run mypy speclib/`
 
-- [ ] 8. Wiring verification
+- [x] 8. Wiring verification
 
-  - [ ] 8.1 Trace every execution path from design.md end-to-end
+  - [x] 8.1 Trace every execution path from design.md end-to-end
     - Path 1: session.assess() -> SpecAgent.assess_prd -> prompts -> tools -> API -> parse -> persist
     - Path 2: session.refine() -> SpecAgent.refine_prd -> prompts -> tools -> API -> parse -> persist
     - Path 3: session.generate() -> SpecAgent.generate_artifacts -> (loop: prompt -> tool -> API -> validate) -> write files
@@ -230,33 +230,33 @@ These must be implemented before task group 3 of this spec.
     - Verify each function in the chain is actually called by the previous one
     - _Requirements: all_
 
-  - [ ] 8.2 Verify return values propagate correctly
+  - [x] 8.2 Verify return values propagate correctly
     - assess_prd returns Assessment consumed by session.assess
     - refine_prd returns (str, Assessment) consumed by session.refine
     - generate_artifacts returns dict consumed by session.generate for file writing
     - _Requirements: all_
 
-  - [ ] 8.3 Run the integration smoke tests
+  - [x] 8.3 Run the integration smoke tests
     - All TS-03-SMOKE-* tests pass with mocked Anthropic client
     - _Test Spec: TS-03-SMOKE-1 through TS-03-SMOKE-4_
 
-  - [ ] 8.4 Stub / dead-code audit
+  - [x] 8.4 Stub / dead-code audit
     - Search speclib/agent.py, speclib/prompts.py, speclib/tools.py for `return []`, `return None` on non-Optional returns, `pass`, `# TODO`, `NotImplementedError`
     - Each hit must be justified or replaced
     - _Requirements: all_
 
-  - [ ] 8.5 Cross-spec entry point verification
+  - [x] 8.5 Cross-spec entry point verification
     - Verify `SpecSession.assess()` calls `create_client()` from spec 01
     - Verify `SpecSession.assess/refine/generate()` delegate to `SpecAgent` methods
     - Verify `Assessment` and `Question` types from spec 02 are used correctly
     - Verify `afspec.validate_artifact()` is called during generation
     - _Requirements: all_
 
-  - [ ] 8.V Verify wiring group
-    - [ ] All smoke tests pass
-    - [ ] No unjustified stubs remain in speclib/agent.py, speclib/prompts.py, speclib/tools.py
-    - [ ] All execution paths from design.md are live
-    - [ ] All existing tests still pass: `uv run pytest -q`
+  - [x] 8.V Verify wiring group
+    - [x] All smoke tests pass
+    - [x] No unjustified stubs remain in speclib/agent.py, speclib/prompts.py, speclib/tools.py
+    - [x] All execution paths from design.md are live
+    - [x] All existing tests still pass: `uv run pytest -q`
 
 ## Traceability
 
