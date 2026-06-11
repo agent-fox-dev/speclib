@@ -282,9 +282,9 @@ locations, import paths, and configuration files.
     - [x] All existing tests pass: `make check`
     - [x] `uv run pytest` works from each package directory
 
-- [ ] 11. Wiring verification
+- [x] 11. Wiring verification
 
-  - [ ] 11.1 Trace every execution path from design.md end-to-end
+  - [x] 11.1 Trace every execution path from design.md end-to-end
     - For Path 1 (`spec new`): verify `spec_cli.cli:new_cmd` calls
       `speclib.campaign:Campaign.open` and `Campaign.new_spec`
     - For Path 2 (`spec assess`): verify `spec_cli.cli:assess_cmd`
@@ -295,39 +295,39 @@ locations, import paths, and configuration files.
     - Every path must be live in production code
     - _Requirements: all_
 
-  - [ ] 11.2 Verify return values propagate correctly
+  - [x] 11.2 Verify return values propagate correctly
     - For every function in this spec that returns data consumed by a
       caller, confirm the caller receives and uses the return value
     - Grep for callers of `Campaign.open`, `Campaign.new_spec`,
       `SpecSession.resume`; confirm none discards the return value
     - _Requirements: all_
 
-  - [ ] 11.3 Run the integration smoke tests
+  - [x] 11.3 Run the integration smoke tests
     - All `TS-10-SMOKE-*` tests pass using real components
     - `spec new` creates spec directory through full chain
     - Library can be used without CLI
     - `make check` passes
     - _Test Spec: TS-10-SMOKE-1, TS-10-SMOKE-2, TS-10-SMOKE-3_
 
-  - [ ] 11.4 Stub / dead-code audit
+  - [x] 11.4 Stub / dead-code audit
     - Search all files touched by this spec for: `return []`,
       `return None` on non-Optional returns, `pass` in non-abstract
       methods, `# TODO`, `# stub`, `NotImplementedError`
     - Each hit must be justified or replaced
     - Document any intentional stubs
 
-  - [ ] 11.5 Cross-spec entry point verification
+  - [x] 11.5 Cross-spec entry point verification
     - Verify that `spec_cli.cli:main` (the console script entry point)
       is reachable from the installed `spec` command
     - Verify that `speclib.__init__` re-exports all public symbols
     - _Requirements: all_
 
-  - [ ] 11.V Verify wiring group
-    - [ ] All smoke tests pass
-    - [ ] No unjustified stubs remain in touched files
-    - [ ] All execution paths from design.md are live (traceable in code)
-    - [ ] All cross-spec entry points are called from production code
-    - [ ] All existing tests still pass: `make check`
+  - [x] 11.V Verify wiring group
+    - [x] All smoke tests pass
+    - [x] No unjustified stubs remain in touched files
+    - [x] All execution paths from design.md are live (traceable in code)
+    - [x] All cross-spec entry points are called from production code
+    - [x] All existing tests still pass: `make check`
 
 ## Traceability
 
