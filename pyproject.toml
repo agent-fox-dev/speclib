@@ -34,7 +34,7 @@ packages = ["packages/speclib/speclib"]
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests", "packages/afspec/tests", "packages/speclib/tests"]
-import_mode = "importlib"
+addopts = "--import-mode=importlib"
 
 [tool.ruff]
 target-version = "py314"

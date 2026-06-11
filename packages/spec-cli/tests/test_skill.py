@@ -30,7 +30,7 @@ class TestSkillFileExists:
 
     def test_skill_file_exists(self) -> None:
         """SKILL_FILE_PATH points to an existing, non-empty file."""
-        from speclib.skill import SKILL_FILE_PATH
+        from spec_cli.skill import SKILL_FILE_PATH
 
         assert SKILL_FILE_PATH.exists(), (
             f"Skill file must exist at {SKILL_FILE_PATH}"
@@ -49,7 +49,7 @@ class TestSkillHeader:
 
     def test_skill_header_has_name(self) -> None:
         """Skill file contains a top-level heading with 'af-spec'."""
-        from speclib.skill import SKILL_FILE_PATH
+        from spec_cli.skill import SKILL_FILE_PATH
 
         content = SKILL_FILE_PATH.read_text()
         # Check for a markdown heading containing af-spec (case-insensitive)
@@ -59,7 +59,7 @@ class TestSkillHeader:
 
     def test_skill_header_has_trigger(self) -> None:
         """Skill file contains a 'Trigger' section or subsection."""
-        from speclib.skill import SKILL_FILE_PATH
+        from spec_cli.skill import SKILL_FILE_PATH
 
         content = SKILL_FILE_PATH.read_text()
         assert "trigger" in content.lower(), (
@@ -78,7 +78,7 @@ class TestDocumentsAllCommands:
 
     def test_documents_all_commands(self) -> None:
         """Skill file references all required af-spec commands."""
-        from speclib.skill import SKILL_FILE_PATH
+        from spec_cli.skill import SKILL_FILE_PATH
 
         content = SKILL_FILE_PATH.read_text()
         required_commands = [
@@ -109,7 +109,7 @@ class TestCommandExamples:
 
     def test_command_examples_in_code_blocks(self) -> None:
         """At least one code block example per required command."""
-        from speclib.skill import SKILL_FILE_PATH
+        from spec_cli.skill import SKILL_FILE_PATH
 
         content = SKILL_FILE_PATH.read_text()
         code_blocks = _extract_fenced_code_blocks(content)
@@ -134,7 +134,7 @@ class TestValidMarkdown:
 
     def test_valid_markdown_fences(self) -> None:
         """All fenced code blocks are properly closed."""
-        from speclib.skill import SKILL_FILE_PATH
+        from spec_cli.skill import SKILL_FILE_PATH
 
         content = SKILL_FILE_PATH.read_text()
         fence_count = len(re.findall(r"^```", content, re.MULTILINE))
@@ -154,7 +154,7 @@ class TestInteractiveWorkflow:
 
     def test_interactive_workflow_described(self) -> None:
         """Skill file describes the interactive workflow with all key steps."""
-        from speclib.skill import SKILL_FILE_PATH
+        from spec_cli.skill import SKILL_FILE_PATH
 
         content = SKILL_FILE_PATH.read_text().lower()
         assert "interactive" in content, "Must mention 'interactive'"
@@ -176,7 +176,7 @@ class TestAssessmentPresentation:
 
     def test_assessment_presentation_instructions(self) -> None:
         """Skill file instructs presenting assessment output to the user."""
-        from speclib.skill import SKILL_FILE_PATH
+        from spec_cli.skill import SKILL_FILE_PATH
 
         content = SKILL_FILE_PATH.read_text().lower()
         assert "present" in content and "assessment" in content, (
@@ -195,7 +195,7 @@ class TestAcceptOrRefine:
 
     def test_accept_or_refine_instructions(self) -> None:
         """Skill file instructs asking the user whether to accept or refine."""
-        from speclib.skill import SKILL_FILE_PATH
+        from spec_cli.skill import SKILL_FILE_PATH
 
         content = SKILL_FILE_PATH.read_text().lower()
         assert "accept" in content and "refin" in content, (
@@ -218,7 +218,7 @@ class TestOneShotWorkflow:
 
     def test_one_shot_workflow_described(self) -> None:
         """Skill file describes one-shot mode with --one-shot flag."""
-        from speclib.skill import SKILL_FILE_PATH
+        from spec_cli.skill import SKILL_FILE_PATH
 
         content = SKILL_FILE_PATH.read_text()
         assert "--one-shot" in content, (
@@ -237,7 +237,7 @@ class TestOneShotResult:
 
     def test_one_shot_result_presentation(self) -> None:
         """Skill file instructs presenting the result after one-shot generation."""
-        from speclib.skill import SKILL_FILE_PATH
+        from spec_cli.skill import SKILL_FILE_PATH
 
         content = SKILL_FILE_PATH.read_text().lower()
         has_one_shot = "one-shot" in content or "one_shot" in content
@@ -259,7 +259,7 @@ class TestQuestionIdParsing:
 
     def test_question_id_parsing_instructions(self) -> None:
         """Skill file contains instructions about parsing question IDs."""
-        from speclib.skill import SKILL_FILE_PATH
+        from spec_cli.skill import SKILL_FILE_PATH
 
         content = SKILL_FILE_PATH.read_text().lower()
         assert "question" in content and "id" in content, (
@@ -278,7 +278,7 @@ class TestNaturalLanguageQuestions:
 
     def test_natural_language_question_presentation(self) -> None:
         """Skill file instructs presenting questions in natural language."""
-        from speclib.skill import SKILL_FILE_PATH
+        from spec_cli.skill import SKILL_FILE_PATH
 
         content = SKILL_FILE_PATH.read_text().lower()
         has_style = "natural" in content or "conversational" in content
@@ -299,7 +299,7 @@ class TestAnswerMapping:
 
     def test_answer_mapping_instructions(self) -> None:
         """Skill file instructs mapping answers with --answers and JSON."""
-        from speclib.skill import SKILL_FILE_PATH
+        from spec_cli.skill import SKILL_FILE_PATH
 
         content = SKILL_FILE_PATH.read_text()
         assert "--answers" in content, (
@@ -321,7 +321,7 @@ class TestErrorHandlingSection:
 
     def test_error_handling_section(self) -> None:
         """Skill file contains an error handling section."""
-        from speclib.skill import SKILL_FILE_PATH
+        from spec_cli.skill import SKILL_FILE_PATH
 
         content = SKILL_FILE_PATH.read_text().lower()
         assert "error handling" in content, (
@@ -340,7 +340,7 @@ class TestExitCodeChecking:
 
     def test_exit_code_checking_instructions(self) -> None:
         """Skill file instructs checking exit codes or command success."""
-        from speclib.skill import SKILL_FILE_PATH
+        from spec_cli.skill import SKILL_FILE_PATH
 
         content = SKILL_FILE_PATH.read_text().lower()
         has_exit_check = (
@@ -364,7 +364,7 @@ class TestStatusCheck:
 
     def test_status_check_before_operations(self) -> None:
         """Skill file instructs using 'af-spec status' to check state."""
-        from speclib.skill import SKILL_FILE_PATH
+        from spec_cli.skill import SKILL_FILE_PATH
 
         content = SKILL_FILE_PATH.read_text()
         assert "af-spec status" in content, (
@@ -389,7 +389,7 @@ class TestEdgeCases:
 
         Requirement: 05-REQ-2.E1
         """
-        from speclib.skill import SKILL_FILE_PATH
+        from spec_cli.skill import SKILL_FILE_PATH
 
         content = SKILL_FILE_PATH.read_text().lower()
         has_zero_questions = (
@@ -406,7 +406,7 @@ class TestEdgeCases:
 
         Requirement: 05-REQ-3.E1
         """
-        from speclib.skill import SKILL_FILE_PATH
+        from spec_cli.skill import SKILL_FILE_PATH
 
         content = SKILL_FILE_PATH.read_text().lower()
         assert "interactive" in content, "Must mention interactive mode"
@@ -420,7 +420,7 @@ class TestEdgeCases:
 
         Requirement: 05-REQ-6.E1
         """
-        from speclib.skill import SKILL_FILE_PATH
+        from spec_cli.skill import SKILL_FILE_PATH
 
         content = SKILL_FILE_PATH.read_text().lower()
         assert "install" in content and "speclib" in content, (
@@ -432,7 +432,7 @@ class TestEdgeCases:
 
         Requirement: 05-REQ-1.E1
         """
-        from speclib.skill import SKILL_FILE_PATH
+        from spec_cli.skill import SKILL_FILE_PATH
 
         content = SKILL_FILE_PATH.read_text().lower()
         has_unsupported = (
@@ -453,7 +453,7 @@ class TestEdgeCases:
 
         Requirement: 05-REQ-4.E1
         """
-        from speclib.skill import SKILL_FILE_PATH
+        from spec_cli.skill import SKILL_FILE_PATH
 
         content = SKILL_FILE_PATH.read_text().lower()
         assert "clarif" in content, (
@@ -473,7 +473,7 @@ class TestEdgeCases:
 
         Requirement: 05-REQ-4.E2
         """
-        from speclib.skill import SKILL_FILE_PATH
+        from spec_cli.skill import SKILL_FILE_PATH
 
         content = SKILL_FILE_PATH.read_text().lower()
         has_partial = (
@@ -501,7 +501,7 @@ class TestProperties:
         Validates: 05-REQ-1.1.
         For any import of speclib.skill, SKILL_FILE_PATH exists and is non-empty.
         """
-        from speclib.skill import SKILL_FILE_PATH
+        from spec_cli.skill import SKILL_FILE_PATH
 
         assert SKILL_FILE_PATH.exists(), (
             f"Skill file must exist at {SKILL_FILE_PATH}"
@@ -515,7 +515,7 @@ class TestProperties:
         Validates: 05-REQ-1.3, 05-REQ-1.4.
         For any required command, 'af-spec {command}' appears in the skill file.
         """
-        from speclib.skill import SKILL_FILE_PATH
+        from spec_cli.skill import SKILL_FILE_PATH
 
         content = SKILL_FILE_PATH.read_text()
         required_commands = [

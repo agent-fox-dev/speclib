@@ -3,11 +3,20 @@
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
 
 import pytest
 
-from .conftest_agent import (
+# Add this test directory to sys.path so conftest_agent can be imported
+# as a top-level module. This avoids needing __init__.py in the test
+# directory, which would cause conftest name collisions across packages
+# in the monorepo layout.
+_test_dir = str(Path(__file__).resolve().parent)
+if _test_dir not in sys.path:
+    sys.path.insert(0, _test_dir)
+
+from conftest_agent import (  # noqa: E402
     mock_client,  # noqa: F401
     sample_assessment,  # noqa: F401
     sample_questions,  # noqa: F401

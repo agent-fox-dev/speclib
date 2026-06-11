@@ -185,20 +185,20 @@ locations, import paths, and configuration files.
     - [x] Spec tests TS-10-5, TS-10-6, TS-10-7 pass
     - [x] No linter warnings: `uv run ruff check packages/spec-cli/`
 
-- [ ] 6. Move CLI tests and update test imports
-  - [ ] 6.1 Move test files to `packages/spec-cli/tests/`
+- [x] 6. Move CLI tests and update test imports
+  - [x] 6.1 Move test files to `packages/spec-cli/tests/`
     - `git mv tests/test_cli.py packages/spec-cli/tests/test_cli.py`
     - `git mv tests/test_ui.py packages/spec-cli/tests/test_ui.py`
     - `git mv tests/test_skill.py packages/spec-cli/tests/test_skill.py`
     - `git mv tests/test_install_skill.py packages/spec-cli/tests/test_install_skill.py`
     - _Requirements: 10-REQ-4.2_
 
-  - [ ] 6.2 Create test infrastructure files
+  - [x] 6.2 Create test infrastructure files
     - Create `packages/spec-cli/tests/__init__.py`
     - Create `packages/spec-cli/tests/conftest.py` if needed
     - _Requirements: 10-REQ-4.2_
 
-  - [ ] 6.3 Update import paths in moved test files
+  - [x] 6.3 Update import paths in moved test files
     - Change `from speclib.cli` → `from spec_cli.cli`
     - Change `from speclib.ui` → `from spec_cli.ui`
     - Change `from speclib.skill` → `from spec_cli.skill`
@@ -206,11 +206,11 @@ locations, import paths, and configuration files.
       `speclib.ui` to use `spec_cli.cli` / `spec_cli.ui`
     - _Requirements: 10-REQ-4.2, 10-REQ-4.E1_
 
-  - [ ] 6.V Verify task group 6
-    - [ ] CLI tests exist at `packages/spec-cli/tests/`
-    - [ ] No test in `packages/speclib/tests/` imports from `spec_cli`
-    - [ ] Spec tests TS-10-E2, TS-10-P3 pass
-    - [ ] No linter warnings: `uv run ruff check packages/spec-cli/`
+  - [x] 6.V Verify task group 6
+    - [x] CLI tests exist at `packages/spec-cli/tests/`
+    - [x] No test in `packages/speclib/tests/` imports from `spec_cli`
+    - [x] Spec tests TS-10-E2, TS-10-P3 pass
+    - [x] No linter warnings: `uv run ruff check packages/spec-cli/`
 
 - [ ] 7. Checkpoint - spec-cli Package Complete
   - Ensure all spec-cli spec tests pass

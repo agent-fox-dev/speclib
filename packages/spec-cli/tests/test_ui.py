@@ -12,8 +12,7 @@ import io
 import sys
 
 import pytest
-
-from speclib.ui import StatusSpinner
+from spec_cli.ui import StatusSpinner
 
 # ---------------------------------------------------------------------------
 # TS-09-11: StatusSpinner context manager

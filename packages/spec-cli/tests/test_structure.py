@@ -400,6 +400,49 @@ def test_ts10_e9_spec_cli_declares_speclib_path_dependency() -> None:
 
 
 # ---------------------------------------------------------------------------
+# TS-10-E5: spec CLI Without speclib
+# Requirement: 10-REQ-2.E2
+# ---------------------------------------------------------------------------
+
+
+def test_ts10_e5_spec_cli_without_speclib() -> None:
+    """TS-10-E5: Importing spec_cli.cli without speclib raises ImportError.
+
+    Uses subprocess isolation to simulate an environment where speclib is
+    not available.  Setting ``sys.modules['speclib'] = None`` in a fresh
+    interpreter blocks the import of speclib before spec_cli.cli is loaded,
+    verifying that spec_cli correctly fails with ImportError when its
+    speclib dependency is missing.
+    """
+    import sys
+
+    code = "\n".join([
+        "import sys",
+        "# Block speclib and all its sub-modules",
+        "sys.modules['speclib'] = None",
+        "sys.modules['speclib.campaign'] = None",
+        "sys.modules['speclib.session'] = None",
+        "sys.modules['speclib.errors'] = None",
+        "try:",
+        "    import spec_cli.cli",
+        "    sys.exit(1)  # Should have raised ImportError",
+        "except ImportError:",
+        "    sys.exit(0)",
+    ])
+    result = subprocess.run(
+        [sys.executable, "-c", code],
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert result.returncode == 0, (
+        "Expected ImportError when speclib is unavailable, but "
+        f"spec_cli.cli imported successfully.\n"
+        f"stdout: {result.stdout}\nstderr: {result.stderr}"
+    )
+
+
+# ---------------------------------------------------------------------------
 # Coverage gap: CLI test files at correct location
 # Requirement: 10-REQ-4.2
 # ---------------------------------------------------------------------------

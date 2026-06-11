@@ -17,8 +17,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from click.testing import CliRunner
-
-from speclib.cli import main  # noqa: I001
+from spec_cli.cli import main  # noqa: I001
 from speclib.errors import CampaignError, SessionError
 
 # ---------------------------------------------------------------------------
@@ -198,7 +197,7 @@ class TestInitCommand:
         target = tmp_path / "test-campaign"
         resolved = target.resolve()
         with patch(
-            "speclib.cli.Campaign"
+            "spec_cli.cli.Campaign"
         ) as mock_cls:
             mock_cls.create.return_value = None
             result = cli_runner.invoke(
@@ -229,7 +228,7 @@ class TestInitCommand:
         target = tmp_path / "my-project"
         resolved = target.resolve()
         with patch(
-            "speclib.cli.Campaign"
+            "spec_cli.cli.Campaign"
         ) as mock_cls:
             mock_cls.create.return_value = None
             result = cli_runner.invoke(
@@ -264,7 +263,7 @@ class TestInitCommand:
         target = tmp_path / "test"
         resolved = target.resolve()
         with patch(
-            "speclib.cli.Campaign"
+            "spec_cli.cli.Campaign"
         ) as mock_cls:
             mock_cls.create.return_value = None
             result = cli_runner.invoke(
@@ -287,7 +286,7 @@ class TestInitCommand:
         """
         target = tmp_path / "existing"
         with patch(
-            "speclib.cli.Campaign"
+            "spec_cli.cli.Campaign"
         ) as mock_cls:
             mock_cls.create.side_effect = CampaignError(
                 "already exists"
@@ -309,7 +308,7 @@ class TestInitCommand:
         passing to Campaign.create.
         """
         with patch(
-            "speclib.cli.Campaign"
+            "spec_cli.cli.Campaign"
         ) as mock_cls:
             mock_cls.create.return_value = None
             result = cli_runner.invoke(
@@ -616,7 +615,7 @@ class TestExitCodes:
         Verify unexpected exceptions exit with code 2.
         """
         with patch(
-            "speclib.cli.SpecSession"
+            "spec_cli.cli.SpecSession"
         ) as mock_cls:
             mock_cls.resume.side_effect = RuntimeError(
                 "unexpected"
@@ -655,7 +654,7 @@ class TestNewCommand:
         """
         mock_session = _mock_session(state="init")
         mock_session.spec_dir = Path("/fake/01_prd")
-        with patch("speclib.cli.Campaign") as mock_cls:
+        with patch("spec_cli.cli.Campaign") as mock_cls:
             campaign = MagicMock()
             mock_cls.open.return_value = campaign
             campaign.new_spec.return_value = mock_session
@@ -687,7 +686,7 @@ class TestNewCommand:
         Verify --name option is passed as spec name.
         """
         mock_session = _mock_session(state="init")
-        with patch("speclib.cli.Campaign") as mock_cls:
+        with patch("spec_cli.cli.Campaign") as mock_cls:
             campaign = MagicMock()
             mock_cls.open.return_value = campaign
             campaign.new_spec.return_value = mock_session
@@ -722,7 +721,7 @@ class TestNewCommand:
         prd = campaign_dir / "My Data Models.md"
         prd.write_text("# Test PRD\n\nSome content.")
         mock_session = _mock_session(state="init")
-        with patch("speclib.cli.Campaign") as mock_cls:
+        with patch("spec_cli.cli.Campaign") as mock_cls:
             campaign = MagicMock()
             mock_cls.open.return_value = campaign
             campaign.new_spec.return_value = mock_session
@@ -753,7 +752,7 @@ class TestNewCommand:
         Verify --one-shot sets session mode.
         """
         mock_session = _mock_session(state="init")
-        with patch("speclib.cli.Campaign") as mock_cls:
+        with patch("spec_cli.cli.Campaign") as mock_cls:
             campaign = MagicMock()
             mock_cls.open.return_value = campaign
             campaign.new_spec.return_value = mock_session
@@ -810,7 +809,7 @@ class TestNewCommand:
         Requirement: 04-REQ-3.E1
         Verify error when spec name contains invalid characters.
         """
-        with patch("speclib.cli.Campaign") as mock_cls:
+        with patch("spec_cli.cli.Campaign") as mock_cls:
             campaign = MagicMock()
             mock_cls.open.return_value = campaign
             campaign.new_spec.side_effect = CampaignError(
@@ -851,7 +850,7 @@ class TestAssessCommand:
         summary.
         """
         assessment = _sample_assessment()
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="init")
             session.assess = AsyncMock(return_value=assessment)
             mock_cls.resume.return_value = session
@@ -881,7 +880,7 @@ class TestAssessCommand:
         Verify assessment output has clear section headers.
         """
         assessment = _sample_assessment()
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="init")
             session.assess = AsyncMock(return_value=assessment)
             mock_cls.resume.return_value = session
@@ -917,7 +916,7 @@ class TestAssessCommand:
         Verify assess prints state error when session is not in
         init or refining.
         """
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="generated")
             session.assess = AsyncMock(
                 side_effect=SessionError(
@@ -947,7 +946,7 @@ class TestAssessCommand:
         Requirement: 04-REQ-4.E1
         Verify assess exits 2 on agent pipeline error.
         """
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="init")
             session.assess = AsyncMock(
                 side_effect=RuntimeError("agent failed")
@@ -981,7 +980,7 @@ class TestRefineCommand:
         confirmation.
         """
         assessment = _sample_assessment()
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="refining")
             session.refine = AsyncMock(return_value=assessment)
             mock_cls.resume.return_value = session
@@ -1066,7 +1065,7 @@ class TestRefineCommand:
         Requirement: 04-REQ-5.4
         Verify refine prints state error when not in refining.
         """
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="init")
             session.refine = AsyncMock(
                 side_effect=SessionError(
@@ -1100,7 +1099,7 @@ class TestRefineCommand:
         Verify refine prints updated assessment summary.
         """
         assessment = _sample_assessment()
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="refining")
             session.refine = AsyncMock(return_value=assessment)
             mock_cls.resume.return_value = session
@@ -1164,7 +1163,7 @@ class TestRefineQuestionExport:
 
         Requirement: 06-REQ-1.1
         """
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="assessing")
             session._assessment_history = [{"questions": []}]
             session.pending_questions.return_value = [
@@ -1216,7 +1215,7 @@ class TestRefineQuestionExport:
                 "required": False,
             },
         ]
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="assessing")
             session._assessment_history = [{"questions": []}]
             session.pending_questions.return_value = questions
@@ -1256,7 +1255,7 @@ class TestRefineQuestionExport:
                 "options": [], "required": False,
             },
         ]
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="assessing")
             session._assessment_history = [{"questions": []}]
             session.pending_questions.return_value = questions
@@ -1287,7 +1286,7 @@ class TestRefineQuestionExport:
         Requirement: 06-REQ-1.4
         """
         assessment = _sample_assessment()
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="refining")
             session.refine = AsyncMock(return_value=assessment)
             mock_cls.resume.return_value = session
@@ -1314,7 +1313,7 @@ class TestRefineQuestionExport:
 
         Requirement: 06-REQ-1.E1
         """
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="init")
             session._assessment_history = []
             session.pending_questions.return_value = []
@@ -1339,7 +1338,7 @@ class TestRefineQuestionExport:
 
         Requirement: 06-REQ-1.E2
         """
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="assessing")
             session._assessment_history = [{"questions": []}]
             session.pending_questions.return_value = []
@@ -1388,7 +1387,7 @@ class TestRefineQuestionExport:
         answers_path.write_text(json.dumps(answers_dict))
 
         assessment = _sample_assessment()
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="assessing")
             session.refine = AsyncMock(return_value=assessment)
             mock_cls.resume.return_value = session
@@ -1534,7 +1533,7 @@ class TestAcceptCommand:
         Verify accept calls session.accept_prd and prints new
         state.
         """
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="assessing")
             session.accept_prd.return_value = None
             mock_cls.resume.return_value = session
@@ -1560,7 +1559,7 @@ class TestAcceptCommand:
         Requirement: 04-REQ-6.2
         Verify accept fails when not in assessing or refining.
         """
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="init")
             session.accept_prd.side_effect = SessionError(
                 "Cannot accept PRD in state 'init'"
@@ -1601,7 +1600,7 @@ class TestGenerateCommand:
                 "tasks.md",
             ],
         }
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="prd_accepted")
             session.generate = AsyncMock(return_value=gen_result)
             mock_cls.resume.return_value = session
@@ -1627,7 +1626,7 @@ class TestGenerateCommand:
         Requirement: 04-REQ-7.3
         Verify generate fails when not in prd_accepted state.
         """
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="init")
             session.generate = AsyncMock(
                 side_effect=SessionError(
@@ -1658,7 +1657,7 @@ class TestGenerateCommand:
         Requirement: 04-REQ-7.E1
         Verify generate exits 2 on agent pipeline error.
         """
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="prd_accepted")
             session.generate = AsyncMock(
                 side_effect=RuntimeError("agent failed")
@@ -1693,7 +1692,7 @@ class TestValidateCommand:
         validation_result.valid = True
         validation_result.schema_errors = []
         validation_result.integrity_errors = []
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="generated")
             session.validate.return_value = validation_result
             mock_cls.resume.return_value = session
@@ -1734,7 +1733,7 @@ class TestValidateCommand:
             }
         ]
         validation_result.integrity_errors = []
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="generated")
             session.validate.return_value = validation_result
             mock_cls.resume.return_value = session
@@ -1770,7 +1769,7 @@ class TestValidateCommand:
         Requirement: 04-REQ-8.E1
         Verify validate reports missing artifacts.
         """
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="generated")
             session.validate.side_effect = SessionError(
                 "Missing required artifacts: design.md"
@@ -1805,7 +1804,7 @@ class TestRenderCommand:
         rendered = {
             "prd.md": "# Spec Title\n\n## Requirements\n...",
         }
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="generated")
             session.render.return_value = rendered
             mock_cls.resume.return_value = session
@@ -1831,7 +1830,7 @@ class TestRenderCommand:
         Requirement: 04-REQ-9.2
         Verify render passes combined=True when flag is set.
         """
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="generated")
             session.render.return_value = (
                 "# Combined\n\nAll artifacts."
@@ -1865,7 +1864,7 @@ class TestRenderCommand:
             "prd.md": "# PRD",
             "design.md": "# Design",
         }
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="generated")
             session.render.return_value = rendered
             mock_cls.resume.return_value = session
@@ -1891,7 +1890,7 @@ class TestRenderCommand:
         Requirement: 04-REQ-9.E1
         Verify render reports missing artifacts.
         """
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="generated")
             session.render.side_effect = SessionError(
                 "Missing required artifacts: requirements.md"
@@ -2114,7 +2113,7 @@ class TestPropertyErrorNonzeroExit:
         for error_cls in [CampaignError, SessionError]:
             for cmd_args in commands:
                 with patch(
-                    "speclib.cli.Campaign"
+                    "spec_cli.cli.Campaign"
                 ) as mock_cls:
                     mock_cls.open.side_effect = error_cls(
                         "test error"
@@ -2245,7 +2244,7 @@ class TestPropertyStateGateEnforcement:
         ]
         for cmd, extra, wrong_state, error_msg in state_gates:
             with patch(
-                "speclib.cli.SpecSession"
+                "spec_cli.cli.SpecSession"
             ) as mock_cls:
                 session = _mock_session(state=wrong_state)
                 if cmd == "assess":
@@ -2494,7 +2493,7 @@ class TestAssessSpinner:
         exit code should be 0.
         """
         assessment = _sample_assessment()
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="init")
             session.assess = AsyncMock(return_value=assessment)
             mock_cls.resume.return_value = session
@@ -2531,7 +2530,7 @@ class TestRefineSpinner:
         Requirement: 09-REQ-1.2
         """
         assessment = _sample_assessment()
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="assessing")
             session.refine = AsyncMock(return_value=assessment)
             mock_cls.resume.return_value = session
@@ -2571,7 +2570,7 @@ class TestGenerateSpinner:
                 "tasks",
             ],
         }
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="prd_accepted")
             session.generate = AsyncMock(return_value=gen_result)
             mock_cls.resume.return_value = session
@@ -2607,7 +2606,7 @@ class TestGenerateSpinner:
                 "tasks",
             ],
         }
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="prd_accepted")
             session.generate = AsyncMock(return_value=gen_result)
             mock_cls.resume.return_value = session
@@ -2645,7 +2644,7 @@ class TestSpinnerStopsOnSuccess:
         and no ANSI escape remnants should remain.
         """
         assessment = _sample_assessment()
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="init")
             session.assess = AsyncMock(return_value=assessment)
             mock_cls.resume.return_value = session
@@ -2686,7 +2685,7 @@ class TestSpinnerStderrOnly:
         stdout should contain only assessment output, not spinner text.
         """
         assessment = _sample_assessment()
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="init")
             session.assess = AsyncMock(return_value=assessment)
             mock_cls.resume.return_value = session
@@ -2726,7 +2725,7 @@ class TestSpinnerNonTTY:
         as plain text without ANSI escape sequences.
         """
         assessment = _sample_assessment()
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="init")
             session.assess = AsyncMock(return_value=assessment)
             mock_cls.resume.return_value = session
@@ -2770,7 +2769,7 @@ class TestQuietFlagAccepted:
         Requirement: 09-REQ-3.1
         """
         assessment = _sample_assessment()
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="init")
             session.assess = AsyncMock(return_value=assessment)
             mock_cls.resume.return_value = session
@@ -2798,7 +2797,7 @@ class TestQuietFlagAccepted:
         Requirement: 09-REQ-3.1
         """
         assessment = _sample_assessment()
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="init")
             session.assess = AsyncMock(return_value=assessment)
             mock_cls.resume.return_value = session
@@ -2830,7 +2829,7 @@ class TestQuietSuppressesSpinner:
         Requirement: 09-REQ-3.2
         """
         assessment = _sample_assessment()
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="init")
             session.assess = AsyncMock(return_value=assessment)
             mock_cls.resume.return_value = session
@@ -2865,7 +2864,7 @@ class TestQuietPreservesOutput:
         Requirement: 09-REQ-3.3
         """
         assessment = _sample_assessment()
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="init")
             session.assess = AsyncMock(return_value=assessment)
             mock_cls.resume.return_value = session
@@ -2902,7 +2901,7 @@ class TestQuietFlagInContext:
         accessible to subcommands.
         """
         assessment = _sample_assessment()
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="init")
             session.assess = AsyncMock(return_value=assessment)
             mock_cls.resume.return_value = session
@@ -2945,7 +2944,7 @@ class TestSpinnerStopsOnError:
         stopped and the error message should appear. No ANSI escape
         remnants should remain in stderr after cleanup.
         """
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="init")
             session.assess = AsyncMock(
                 side_effect=SessionError("test assessment error")
@@ -3032,7 +3031,7 @@ class TestQuietSuppressesAllProperty:
             else:
                 resolved_args.append(arg)
 
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="init")
             setup_session(session)
             mock_cls.resume.return_value = session
@@ -3119,7 +3118,7 @@ class TestSpinnerStderrOnlyProperty:
         }
         expected_keyword = spinner_keywords[cmd]
 
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="init")
             setup_session(session)
             mock_cls.resume.return_value = session
@@ -3167,7 +3166,7 @@ class TestSpinnerCleanupProperty:
 
         Requirement: 09-REQ-1.E1
         """
-        with patch("speclib.cli.SpecSession") as mock_cls:
+        with patch("spec_cli.cli.SpecSession") as mock_cls:
             session = _mock_session(state="init")
             session.assess = AsyncMock(
                 side_effect=error_cls("test error")

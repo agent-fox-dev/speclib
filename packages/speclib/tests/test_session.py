@@ -1245,66 +1245,12 @@ class TestQAExchangeRecording:
 
 
 class TestQAExchangeNoSideEffects:
-    """Tests verifying existing interfaces are unaffected — TS-07-6, TS-07-7."""
+    """Tests verifying existing interfaces are unaffected — TS-07-6, TS-07-7.
 
-    def test_ts07_6_question_export_unchanged(
-        self,
-        tmp_path: Path,
-    ) -> None:
-        """TS-07-6: Question export unchanged.
-
-        Requirement: 07-REQ-3.1
-        Verifies that refine without --answers still outputs only
-        questions and answer template, with no qa_exchanges data.
-        """
-        from click.testing import CliRunner
-        from spec_cli.cli import main
-
-        # Set up campaign with a spec that has qa_exchanges populated
-        camp_dir = tmp_path / "camp_export"
-        Campaign.create(camp_dir, "Test", "Desc")
-        spec_dir = camp_dir / "01_test_spec"
-        spec_dir.mkdir()
-        (spec_dir / "prd.md").write_text("# PRD\nContent.")
-        (spec_dir / "_session.json").write_text(json.dumps({
-            "state": "assessing",
-            "prd_path": "prd.md",
-            "assessment_history": [
-                {
-                    "quality": "needs_refinement",
-                    "summary": "Needs work",
-                    "gaps": [],
-                    "questions": [
-                        {
-                            "id": "q1",
-                            "text": "What?",
-                            "context": "C",
-                            "options": [],
-                            "required": True,
-                        }
-                    ],
-                }
-            ],
-            "qa_exchanges": [
-                {
-                    "assessment_index": 0,
-                    "answers": {"q0": "prev answer"},
-                    "timestamp": "2026-01-01T00:00:00+00:00",
-                }
-            ],
-            "generated_artifacts": [],
-            "mode": "interactive",
-        }))
-
-        runner = CliRunner()
-        result = runner.invoke(
-            main,
-            ["--campaign-dir", str(camp_dir), "refine", "01"],
-        )
-
-        assert result.exit_code == 0
-        data = json.loads(result.output)
-        assert set(data.keys()) == {"questions", "answers"}
+    Note: TS-07-6 (question export via CLI) moved to
+    packages/spec-cli/tests/test_qa_exchange_cli.py because it imports
+    from both speclib and spec_cli (per 10-REQ-4.E1).
+    """
 
     def test_ts07_7_pending_questions_unaffected(self, tmp_path: Path) -> None:
         """TS-07-7: pending_questions unaffected.

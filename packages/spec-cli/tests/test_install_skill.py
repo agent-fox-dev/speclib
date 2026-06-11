@@ -41,7 +41,7 @@ class TestDetectAgentCli:
 
     def test_detect_claude(self, patched_home: Path) -> None:
         """detect_agent_cli returns 'claude' when ~/.claude/ exists."""
-        from speclib.skill import detect_agent_cli
+        from spec_cli.skill import detect_agent_cli
 
         (patched_home / ".claude").mkdir()
         result = detect_agent_cli()
@@ -49,7 +49,7 @@ class TestDetectAgentCli:
 
     def test_detect_gemini(self, patched_home: Path) -> None:
         """detect_agent_cli returns 'gemini' when ~/.gemini/ exists."""
-        from speclib.skill import detect_agent_cli
+        from spec_cli.skill import detect_agent_cli
 
         (patched_home / ".gemini").mkdir()
         result = detect_agent_cli()
@@ -57,7 +57,7 @@ class TestDetectAgentCli:
 
     def test_detect_none(self, patched_home: Path) -> None:
         """detect_agent_cli returns None when no agent CLI directory exists."""
-        from speclib.skill import detect_agent_cli
+        from spec_cli.skill import detect_agent_cli
 
         result = detect_agent_cli()
         assert result is None
@@ -76,8 +76,8 @@ class TestInstallCopiesFile:
         self, cli_runner: CliRunner, patched_home: Path
     ) -> None:
         """install-skill copies the skill file when agent CLI is detected."""
-        from speclib.cli import cli
-        from speclib.skill import SKILL_FILE_PATH
+        from spec_cli.cli import cli
+        from spec_cli.skill import SKILL_FILE_PATH
 
         (patched_home / ".claude").mkdir()
         result = cli_runner.invoke(cli, ["install-skill"])
@@ -102,7 +102,7 @@ class TestInstallWithTarget:
         self, cli_runner: CliRunner, patched_home: Path
     ) -> None:
         """install-skill --target claude creates the skill file."""
-        from speclib.cli import cli
+        from spec_cli.cli import cli
 
         result = cli_runner.invoke(cli, ["install-skill", "--target", "claude"])
         assert result.exit_code == 0, f"Expected exit code 0, got: {result.output}"
@@ -123,8 +123,8 @@ class TestInstallOverwrites:
         self, cli_runner: CliRunner, patched_home: Path
     ) -> None:
         """install-skill overwrites an existing skill file with current content."""
-        from speclib.cli import cli
-        from speclib.skill import SKILL_FILE_PATH
+        from spec_cli.cli import cli
+        from spec_cli.skill import SKILL_FILE_PATH
 
         skill_dir = patched_home / ".claude" / "skills"
         skill_dir.mkdir(parents=True)
@@ -154,7 +154,7 @@ class TestInstallSuccessMessage:
         self, cli_runner: CliRunner, patched_home: Path
     ) -> None:
         """install-skill output contains the installed file path."""
-        from speclib.cli import cli
+        from spec_cli.cli import cli
 
         result = cli_runner.invoke(cli, ["install-skill", "--target", "claude"])
         assert result.exit_code == 0, f"Expected exit code 0, got: {result.output}"
@@ -178,7 +178,7 @@ class TestEdgeCases:
 
         Requirement: 05-REQ-5.E1
         """
-        from speclib.cli import cli
+        from spec_cli.cli import cli
 
         result = cli_runner.invoke(cli, ["install-skill"])
         assert result.exit_code != 0, (
@@ -199,7 +199,7 @@ class TestEdgeCases:
 
         Requirement: 05-REQ-5.E2
         """
-        from speclib.cli import cli
+        from spec_cli.cli import cli
 
         (patched_home / ".claude").mkdir()
         # Note: ~/.claude/skills/ does NOT exist yet
@@ -223,9 +223,9 @@ class TestEdgeCases:
         underlying cause. The CLI error handler may catch SpeclibError and
         convert it to a non-zero exit, so we verify the error message too.
         """
-        from speclib.cli import cli
+        from spec_cli.cli import cli
 
-        with patch("speclib.skill.SKILL_FILE_PATH", Path("/nonexistent/af-spec.md")):
+        with patch("spec_cli.skill.SKILL_FILE_PATH", Path("/nonexistent/af-spec.md")):
             result = cli_runner.invoke(cli, ["install-skill", "--target", "claude"])
         assert result.exit_code != 0, (
             "Must exit with non-zero code when source file is missing"
@@ -255,8 +255,8 @@ class TestProperties:
         Validates: 05-REQ-5.2, 05-REQ-5.4.
         For any target, the installed file is byte-identical to the source.
         """
-        from speclib.cli import cli
-        from speclib.skill import SKILL_FILE_PATH
+        from spec_cli.cli import cli
+        from spec_cli.skill import SKILL_FILE_PATH
 
         result = cli_runner.invoke(cli, ["install-skill", "--target", target])
         assert result.exit_code == 0, f"Expected exit code 0, got: {result.output}"
@@ -282,8 +282,8 @@ class TestSmoke:
 
         End-to-end skill installation from package source to agent CLI directory.
         """
-        from speclib.cli import cli
-        from speclib.skill import SKILL_FILE_PATH
+        from spec_cli.cli import cli
+        from spec_cli.skill import SKILL_FILE_PATH
 
         (patched_home / ".claude").mkdir()
         result = cli_runner.invoke(cli, ["install-skill"])
