@@ -365,21 +365,35 @@ def test_ts10_e8_makefile_reports_failure() -> None:
 
 
 @pytest.mark.integration
-def test_ts10_e9_spec_cli_path_dependency_declared() -> None:
-    """TS-10-E9: spec-cli declares speclib as path dependency for auto-install."""
-    config = _load_cli_pyproject()
+def test_ts10_e9_spec_cli_auto_installs_speclib() -> None:
+    """TS-10-E9: Installing spec-cli automatically installs speclib via path dep.
 
-    # Verify speclib is a dependency
-    deps = config["project"]["dependencies"]
-    assert any("speclib" in d for d in deps), (
-        "speclib not declared as a dependency of spec-cli"
+    Subprocess-level verification: run 'uv pip install ./packages/spec-cli'
+    then assert 'import speclib' succeeds.  This exercises the actual
+    automatic installation behavior described in 10-REQ-7.E1, not just the
+    pyproject.toml declaration.
+    """
+    install_result = subprocess.run(
+        ["uv", "pip", "install", str(SPEC_CLI_PKG)],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        timeout=120,
+    )
+    assert install_result.returncode == 0, (
+        f"uv pip install ./packages/spec-cli failed:\n{install_result.stderr}"
     )
 
-    # Verify speclib is a path dependency via uv sources
-    sources = config.get("tool", {}).get("uv", {}).get("sources", {})
-    assert "speclib" in sources, "speclib not in spec-cli uv sources"
-    assert "path" in sources["speclib"], (
-        "speclib source must be a path dependency"
+    # Verify speclib is importable after installing only spec-cli
+    check = subprocess.run(
+        ["uv", "run", "python", "-c", "import speclib"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert check.returncode == 0, (
+        f"speclib not importable after installing spec-cli:\n{check.stderr}"
     )
 
 

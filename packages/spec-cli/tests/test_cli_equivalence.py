@@ -75,3 +75,9 @@ def test_ts10_p3_subcommand_help(subcommand: str) -> None:
         f"spec {subcommand} --help failed with exit code {result.exit_code}:\n"
         f"{result.output}"
     )
+    # Verify the help text actually contains meaningful content:
+    # either the program name 'spec' or the subcommand name itself
+    assert "spec" in result.output or subcommand in result.output, (
+        f"Help text for '{subcommand}' is missing expected content.\n"
+        f"Expected 'spec' or '{subcommand}' in output:\n{result.output}"
+    )
