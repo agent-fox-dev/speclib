@@ -241,8 +241,8 @@ locations, import paths, and configuration files.
     - [x] `uv sync` succeeds
     - [x] Spec tests TS-10-9, TS-10-10, TS-10-13 pass
 
-- [ ] 9. Update root Makefile
-  - [ ] 9.1 Update Makefile targets
+- [x] 9. Update root Makefile
+  - [x] 9.1 Update Makefile targets
     - Update `lint` target to run ruff and mypy across all package
       source directories
     - Update `test` target to run pytest across all packages
@@ -251,10 +251,10 @@ locations, import paths, and configuration files.
     - _Requirements: 10-REQ-5.1, 10-REQ-5.2, 10-REQ-5.3, 10-REQ-5.4,
       10-REQ-5.5_
 
-  - [ ] 9.V Verify task group 9
-    - [ ] Root Makefile has check, lint, test, clean targets
-    - [ ] Spec test TS-10-11 passes
-    - [ ] `make check` passes
+  - [x] 9.V Verify task group 9
+    - [x] Root Makefile has check, lint, test, clean targets
+    - [x] Spec test TS-10-11 passes
+    - [x] `make check` passes
 
 - [ ] 10. Remove old directories and update documentation
   - [ ] 10.1 Remove old top-level directories

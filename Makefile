@@ -4,7 +4,9 @@ check: lint test
 
 lint:
 	uv run ruff check
+	uv run mypy packages/afspec/afspec/
 	uv run mypy packages/speclib/speclib/
+	uv run mypy packages/spec-cli/spec_cli/
 
 test:
 	uv run pytest -q
@@ -17,3 +19,5 @@ clean:
 	rm -rf build dist *.egg-info .eggs
 	rm -rf htmlcov .coverage .coverage.* coverage.xml
 	rm -rf .tox .nox .cache
+	rm -rf packages/*/.pytest_cache packages/*/.mypy_cache packages/*/.ruff_cache
+	rm -rf packages/*/build packages/*/dist packages/*/*.egg-info
