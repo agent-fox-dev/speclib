@@ -959,7 +959,7 @@ This document specifies the coordination layer. Three companion components compl
 | The af MCP bridge logic | Container, env, and credential isolation |
 | Specialist → template mapping | Template hydration and harness provisioning |
 
-The af MCP bridge is the integration point between the two layers: it runs as a sidecar inside each agent container (runtime) and proxies harness tool calls to the hub (coordination). The coordination layer does not know whether the agent runs in a local Podman container or a Kubernetes pod.
+The af MCP bridge is the integration point between the two layers: it runs as a sidecar inside each agent sandbox (runtime) and proxies harness tool calls to the hub (coordination). The coordination layer does not know whether the sandbox runs on a local Docker or Podman backend or on a Kubernetes cluster — OpenShell abstracts the container backend.
 
 ---
 
@@ -991,10 +991,11 @@ The af MCP bridge is the integration point between the two layers: it runs as a 
 | Specialist | A named agent role: prompt, tool policy, model tier, behavior, and actor capability. |
 | Intent hash | SHA-256 of the PRD Intent section, set at draft-to-active and protected thereafter. |
 | Provider | External agent backend driven through one interface. |
-| Runtime layer | Infrastructure layer: containers, worktrees, adapters, agent lifecycle. See [runtime-layer.md](runtime-layer.md). |
+| Runtime layer | Infrastructure layer: sandboxes, worktrees, adapters, agent lifecycle. See [runtime-layer.md](runtime-layer.md). |
+| OpenShell | NVIDIA's open-source sandbox runtime for agent isolation. See [runtime-layer.md §2.1](runtime-layer.md#21-openshell-adapter-default). |
 | Harness adapter | Runtime adapter for a specific provider. See [runtime-layer.md §4](runtime-layer.md#4-harness-adapters). |
 | Template | Blueprint for agent configuration. See [runtime-layer.md §6](runtime-layer.md#6-templates). |
-| af MCP bridge | Sidecar MCP server inside each agent container. See [runtime-layer.md §8](runtime-layer.md#8-the-af-mcp-bridge). |
+| af MCP bridge | Sidecar MCP server inside each agent sandbox. See [runtime-layer.md §8](runtime-layer.md#8-the-af-mcp-bridge). |
 | af hub | Long-running host process owning the three stores. See [services-architecture.md §2](services-architecture.md#2-the-af-hub). |
 | af CLI | Operator's command-line interface. See [services-architecture.md §3](services-architecture.md#3-the-af-cli). |
 | Memory service | Pluggable backend for agent memory. See [services-architecture.md §6](services-architecture.md#6-the-memory-service). |

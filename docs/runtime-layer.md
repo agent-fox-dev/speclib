@@ -26,26 +26,32 @@ architecture (hub, CLI, storage, deployment) is specified in
    interchangeable through one harness adapter interface. Adding a new
    provider means implementing one adapter.
 
-3. **Container-first isolation.** Each agent runs in its own OCI container.
-   The worktree is mounted in; everything else (spec store, harness
-   configuration, sibling agents) is invisible. This is stronger than
-   process-level or worktree-level isolation alone.
+3. **Sandbox-first isolation.** Each agent runs in its own sandbox managed
+   by [NVIDIA OpenShell](https://github.com/NVIDIA/OpenShell). The worktree
+   is mounted in; everything else (spec store, harness configuration, sibling
+   agents) is invisible. OpenShell enforces isolation out-of-process through
+   defense-in-depth: kernel-level filesystem restrictions, network egress
+   filtering, and syscall sandboxing — the agent cannot override its own
+   guardrails.
 
 4. **The coordination layer drives.** The runtime exposes a narrow API. The
    coordination layer calls it to start/stop agents, provision worktrees, and
    inject configuration. The runtime never calls back into the coordination
    layer — the af MCP bridge handles that direction (§8).
 
-5. **Portable across container runtimes.** Podman (rootless) is the default.
-   Kubernetes is supported through the same container runtime interface.
-   Other OCI-compatible runtimes can be added by implementing the interface.
+5. **Portable across sandbox backends.** OpenShell abstracts the underlying
+   container backend: Docker, Podman, MicroVM, and Kubernetes are supported
+   through a single sandbox interface. The af runtime delegates container
+   concerns to OpenShell rather than implementing backend adapters directly.
 
 ---
 
 ## 2. Container runtime interface
 
 The runtime abstracts the container backend behind one interface. Every
-operation the coordination layer needs goes through it.
+operation the coordination layer needs goes through it. The primary
+implementation is an adapter over
+[NVIDIA OpenShell](https://github.com/NVIDIA/OpenShell)'s sandbox API (§2.1).
 
 ```
 interface ContainerRuntime:
@@ -79,23 +85,94 @@ record ContainerState:
     stoppedAt: string or null
 ```
 
-### 2.1 Podman adapter
+### 2.1 OpenShell adapter (default)
 
-The default. Uses the Podman socket API to create, start, stop, and remove
-containers. Rootless by default — agents run without root privileges on the
-host, which limits the blast radius of a container escape. Mounts are bind
-mounts. The agent's worktree is mounted at `/workspace`. The agent's home
-directory is mounted at a configurable path (default `/home/agent`). Shadow
-mounts (tmpfs) prevent access to `.af` configuration and sibling
-worktrees.
+The default implementation. Uses
+[NVIDIA OpenShell](https://github.com/NVIDIA/OpenShell) (Apache 2.0, Rust)
+to create, manage, and enforce isolation on agent sandboxes. OpenShell
+itself supports Docker, Podman (rootless), MicroVM, and Kubernetes as
+underlying container backends, so the af runtime does not implement
+backend-specific adapters.
 
-### 2.2 Kubernetes adapter
+**Sandbox lifecycle.** Each `ContainerRuntime` operation maps to an
+OpenShell sandbox operation:
 
-Runs agents as Pods. Each agent is a Pod with the harness as the main
-container and sidecars (including the af MCP bridge) as additional
-containers. Worktree provisioning uses init containers or CSI volumes. This
-adapter is out of scope for the initial implementation but the interface is
-designed to accommodate it.
+| `ContainerRuntime` method | OpenShell equivalent |
+| --- | --- |
+| `create(spec)` | `openshell sandbox create --from <image>` with mounts, env, and policy |
+| `start(id)` | Sandbox starts on creation; no separate start step |
+| `stop(id, timeout)` | `openshell sandbox stop` with configurable grace period |
+| `remove(id)` | `openshell sandbox rm` |
+| `exec(id, command)` | `openshell sandbox exec` |
+| `logs(id, follow)` | `openshell logs --tail` |
+| `inspect(id)` | Sandbox status query via API |
+
+**Mounts.** The agent's worktree is mounted at `/workspace`. The agent's
+home directory is mounted at a configurable path (default `/home/agent`).
+OpenShell's filesystem policy locks allowed paths at sandbox creation via
+Landlock LSM — kernel-enforced, not bypassable from inside the sandbox.
+Shadow mounts for `.af` configuration and sibling worktrees are unnecessary:
+the Landlock policy denies access to paths not explicitly allowed, which is
+a stronger guarantee than tmpfs overlays.
+
+**Credential injection.** OpenShell manages credentials as *providers*:
+named credential bundles injected into sandboxes at creation. The CLI
+auto-discovers credentials for recognized agents (Claude Code, Codex,
+OpenCode, Copilot) from the host's shell environment, or the Operator can
+create providers explicitly via `openshell provider create`. Credentials
+are injected as environment variables at runtime and never appear on the
+sandbox filesystem.
+
+**Defense-in-depth isolation.** OpenShell enforces constraints
+out-of-process — the agent cannot override its own guardrails:
+
+| Layer | Mechanism | Enforcement |
+| --- | --- | --- |
+| Filesystem | Landlock LSM | Kernel-enforced path allowlists, locked at sandbox creation |
+| Network | HTTP CONNECT proxy with OPA/Rego policies | Deny-by-default; every outbound connection evaluated at the HTTP method and path level |
+| Process | Seccomp BPF filters | Blocks privilege escalation, dangerous syscalls, and socket creation outside the proxy |
+| Inference | Privacy router | Routes LLM API calls based on policy; strips caller credentials, injects backend credentials |
+
+Static protections (filesystem, process) are immutable after creation.
+Dynamic protections (network, inference) can be hot-reloaded on running
+sandboxes via `openshell policy set`.
+
+**Policy model.** Sandbox behavior is governed by declarative YAML policies.
+The af runtime ships a default policy that allows: read-write access to
+`/workspace` and the agent home, read-only access to template files,
+localhost egress to the hub's bridge port, and inference egress to the
+configured model provider. The Operator can customize policies per workspace
+or per agent role via the configuration hierarchy (§11).
+
+**Inference routing.** The privacy router intercepts LLM API calls from the
+harness and routes them based on policy — not the agent's preference. This
+enables deployments where sensitive context stays on-device using local
+open-weight models while frontier models (Claude, GPT) are used only when
+policy allows. The router is model-agnostic by design.
+
+**Built-in agent support.** OpenShell ships with pre-configured support for
+Claude Code, Codex, OpenCode, and GitHub Copilot. Agents run unmodified
+inside sandboxes with zero code changes. The default sandbox image includes
+Python 3.14, Node 22, git, and standard developer tools.
+
+### 2.2 Kubernetes deployment
+
+OpenShell provides an experimental Helm chart for Kubernetes deployment.
+The same `ContainerRuntime` adapter works because OpenShell abstracts the
+container backend — the adapter calls `openshell sandbox create` regardless
+of whether the sandbox runs as a Docker container, a Podman pod, or a
+Kubernetes pod. Kubernetes-specific concerns (init containers, CSI volumes,
+pod scheduling) are handled by OpenShell, not by the af runtime.
+
+### 2.3 Direct container fallback
+
+For environments where OpenShell is not available (minimal setups, custom
+container runtimes), the `ContainerRuntime` interface supports a direct
+Podman or Docker adapter. This fallback uses the container engine's socket
+API directly, with bind mounts for the worktree and agent home. It provides
+process-level isolation but lacks OpenShell's defense-in-depth (no Landlock,
+no network proxy, no inference routing). The interface contract is
+identical; only the isolation guarantees are weaker.
 
 ---
 
@@ -240,7 +317,23 @@ interface HarnessAdapter:
 - **Auth:** Provider-specific API key env var.
 - **Resume:** Not supported; starts fresh.
 
-### 4.5 Adding a new adapter
+### 4.5 Credential injection under OpenShell
+
+When running under OpenShell (§2.1), credential injection is handled by
+OpenShell's provider mechanism rather than by each harness adapter
+individually. OpenShell auto-discovers credentials for recognized agents
+from the host's shell environment (e.g. `ANTHROPIC_API_KEY` for Claude
+Code, `OPENAI_API_KEY` for Codex) and injects them into the sandbox as
+environment variables. The adapter's `resolveAuth()` delegates to this
+mechanism: it declares which credential type the harness needs, and
+OpenShell resolves and injects it. The adapter does not handle raw API
+keys or credential files directly.
+
+For agents or auth methods OpenShell does not recognize (Vertex AI, AWS
+Bedrock, custom providers), `resolveAuth()` falls back to explicit
+credential injection via `openshell provider create --type custom`.
+
+### 4.6 Adding a new adapter
 
 Implement the `HarnessAdapter` interface. Register it in the adapter
 registry. No changes to the coordination layer or the container runtime.
@@ -435,6 +528,20 @@ The harness does not start until all sidecar services with readiness checks
 have reported ready. This ensures the af MCP bridge is available before
 the agent begins working.
 
+### 7.1 Sidecars under OpenShell
+
+OpenShell sandboxes are full environments, not single-process containers.
+Each sandbox includes a shell, language runtimes, and standard developer
+tools. Sidecar services (including the af MCP bridge) run as background
+processes inside the sandbox, managed by the runtime's service supervisor.
+
+The sandbox policy must allow the network access sidecars require. For the
+af MCP bridge, this means localhost egress to the hub's bridge port
+(`AF_HUB_HOST:AF_HUB_PORT`). The default af sandbox policy includes this
+rule. Additional sidecars that reach external services need corresponding
+network policy entries — either in the default policy or in a per-workspace
+override.
+
 ---
 
 ## 8. The af MCP bridge
@@ -555,19 +662,29 @@ The full sequence from workspace creation to a running agent:
 
 ---
 
-## 10. Container image
+## 10. Sandbox image
 
-The runtime uses a base container image that includes:
+OpenShell's default sandbox image includes a shell, standard Unix tools,
+Python 3.14, Node 22, git, and common developer tools (`gh`, `vim`, `nano`).
+The af runtime extends this with:
 
-- A shell and standard Unix tools.
-- Git.
 - A terminal multiplexer (tmux).
 - The af MCP bridge binary.
-- Common language runtimes and build tools (configurable per image variant).
+- Additional language runtimes and build tools as needed.
+
+OpenShell supports three image sources:
+
+- **Community catalog:** `--from <name>` pulls a pre-built image from the
+  OpenShell community registry. The af runtime can publish its base image
+  here for zero-setup onboarding.
+- **Custom Dockerfile:** `--from ./path` builds from a local Dockerfile.
+  This is the standard path for af images that need project-specific tools
+  or dependencies.
+- **Container registry:** `--from registry.io/img:tag` pulls an existing
+  OCI image. For organizations with private registries.
 
 The harness (Claude Code, Gemini CLI, etc.) is either pre-installed in the
-image or installed during provisioning. Image variants per harness keep image
-sizes manageable.
+image or installed during provisioning.
 
 The image does not include the af coordination service, the spec store,
 or any coordination logic. These run on the host and the bridge reaches them
@@ -584,8 +701,13 @@ over the network.
 data_dir: ~/.local/share/af   # default; override with AF_DATA_DIR env var
 
 runtime:
-  backend: podman              # podman | kubernetes
-  image: af/agent:latest    # default base image
+  backend: openshell           # openshell (default) | podman | kubernetes
+  image: af/agent:latest       # default base image (or --from source for OpenShell)
+  openshell:
+    policy: ~/.af/sandbox-policy.yaml   # default sandbox policy
+    inference:                          # inference privacy routing
+      local_model: null                 # e.g. "ollama:llama3" for local routing
+      allow_remote: true                # allow frontier model API calls
 
 defaults:
   harness: claude

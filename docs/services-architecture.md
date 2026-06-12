@@ -18,7 +18,7 @@ layer (containers, worktrees, adapters, agent lifecycle) is specified in
 ## 1. Design principles
 
 1. **Local-first.** The default deployment is everything on one machine: one
-   hub process, one SQLite database, containers on local Podman. No
+   hub process, one SQLite database, agent sandboxes on local OpenShell. No
    network services, no cloud dependencies, no accounts.
 
 2. **Single stateful process.** The hub owns all mutable state. The CLI,
@@ -214,12 +214,15 @@ Two paths to create a spec:
 
 The runtime engine (specified in [runtime-layer.md](runtime-layer.md)) runs
 as a library embedded in the hub, not as a separate process. The hub
-calls it to create containers, start agents, manage worktrees, and
+calls it to create sandboxes, start agents, manage worktrees, and
 orchestrate sidecars.
 
 This means the hub process is the only thing the Operator needs to start.
-The container runtime (Podman) must be available on the host, but
+[NVIDIA OpenShell](https://github.com/NVIDIA/OpenShell) must be installed
+on the host (see [runtime-layer.md §2.1](runtime-layer.md#21-openshell-adapter-default));
 the Operator interacts with it only through the af CLI, never directly.
+OpenShell in turn requires a container backend (Docker or Podman) on the
+host.
 
 ### 4.1 Runtime lifecycle within the hub
 
@@ -905,12 +908,30 @@ capability model (see
 [coordination-layer.md §6.4](coordination-layer.md#64-specialists-actor-capabilities-and-instruction-precedence))
 at the bridge boundary.
 
-### 10.2 Container isolation
+### 10.2 Sandbox isolation
 
-Detailed in [runtime-layer.md](runtime-layer.md). The key guarantee: an
-agent container sees only its mounted worktree, its agent home directory,
-and the MCP bridge socket. It cannot see the af database, other agents'
-homes, or the spec store on the host filesystem.
+Detailed in [runtime-layer.md §2.1](runtime-layer.md#21-openshell-adapter-default).
+The key guarantee: an agent sandbox sees only its mounted worktree, its
+agent home directory, and the MCP bridge socket. It cannot see the af
+database, other agents' homes, or the spec store on the host filesystem.
+
+OpenShell enforces this through defense-in-depth, all out-of-process:
+
+- **Filesystem:** Landlock LSM locks path allowlists at sandbox creation.
+  Kernel-enforced — the agent cannot override or escape them.
+- **Network:** Deny-by-default. Every outbound connection goes through an
+  HTTP CONNECT proxy evaluated by OPA/Rego policies at the HTTP method and
+  path level. The sandbox policy must explicitly allow egress to the hub's
+  bridge port and to the model provider's API.
+- **Process:** Seccomp BPF filters block privilege escalation, dangerous
+  syscalls, and socket creation outside the proxy.
+- **Inference:** The privacy router intercepts LLM API calls, strips caller
+  credentials, and injects backend credentials. Routing is policy-driven,
+  not agent-driven.
+
+Static protections (filesystem, process) are immutable after sandbox
+creation. Dynamic protections (network, inference) can be hot-reloaded
+via `openshell policy set` without restarting the sandbox.
 
 ### 10.3 Hub access
 
@@ -924,9 +945,9 @@ is localhost-only by default. No authentication is needed for the CLI socket
 
 ### 11.1 Local (default)
 
-Everything on one machine. Podman for containers. SQLite for
-storage. Embedded memory service. The Operator runs `af hub start` and
-uses the CLI.
+Everything on one machine. OpenShell for agent sandboxes (backed by Docker
+or Podman on the host). SQLite for storage. Embedded memory service. The
+Operator runs `af hub start` and uses the CLI.
 
 ### 11.2 Future: remote hub
 
