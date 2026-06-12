@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Extends the `af-spec refine` CLI command and the `SpecSession` library class to
+Extends the `spec refine` CLI command and the `SpecSession` library class to
 support question export: when `refine` is called without `--answers`, it outputs
 the pending assessment questions as structured JSON to stdout.
 
@@ -21,37 +21,37 @@ the pending assessment questions as structured JSON to stdout.
 
 ### Requirement 1: Question Export on Refine Without Answers
 
-**User Story:** As a user or automation agent, I want to run `af-spec refine`
+**User Story:** As a user or automation agent, I want to run `spec refine`
 without `--answers` to get the pending questions as JSON, so that I can easily
 create the expected answer file.
 
 #### Acceptance Criteria
 
-1. [06-REQ-1.1] WHEN `af-spec refine <spec>` is invoked without `--answers`,
+1. [06-REQ-1.1] WHEN `spec refine <spec>` is invoked without `--answers`,
    THE CLI SHALL output a JSON object to stdout containing the pending
    assessment questions and an answer template, AND exit with code 0.
 
-2. [06-REQ-1.2] WHEN `af-spec refine <spec>` is invoked without `--answers`,
+2. [06-REQ-1.2] WHEN `spec refine <spec>` is invoked without `--answers`,
    THE CLI SHALL include a `questions` key in the JSON output whose value is an
    array of question objects, each containing keys `id`, `text`, `context`,
    `options`, and `required`.
 
-3. [06-REQ-1.3] WHEN `af-spec refine <spec>` is invoked without `--answers`,
+3. [06-REQ-1.3] WHEN `spec refine <spec>` is invoked without `--answers`,
    THE CLI SHALL include an `answers` key in the JSON output whose value is a
    JSON object mapping each question ID to an empty string.
 
-4. [06-REQ-1.4] WHEN `af-spec refine <spec> --answers <file>` is invoked,
+4. [06-REQ-1.4] WHEN `spec refine <spec> --answers <file>` is invoked,
    THE CLI SHALL continue to submit answers and update the PRD exactly as
    before (no behavioral change to existing path).
 
 #### Edge Cases
 
-1. [06-REQ-1.E1] IF `af-spec refine <spec>` is invoked without `--answers` and
+1. [06-REQ-1.E1] IF `spec refine <spec>` is invoked without `--answers` and
    the session has no assessment (empty assessment history), THEN THE CLI SHALL
    print an error message to stderr indicating no assessment exists and exit
    with code 1.
 
-2. [06-REQ-1.E2] IF `af-spec refine <spec>` is invoked without `--answers` and
+2. [06-REQ-1.E2] IF `spec refine <spec>` is invoked without `--answers` and
    the latest assessment contains zero questions, THEN THE CLI SHALL output a
    JSON object with an empty `questions` array and an empty `answers` object,
    AND exit with code 0.

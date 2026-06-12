@@ -25,7 +25,7 @@ components that all other speclib features depend on.
 **User Story:** As a developer, I want a properly structured Python package with uv-managed dependencies, so that I can install and develop speclib reliably.
 
 #### Acceptance Criteria
-1. [01-REQ-1.1] THE speclib package SHALL be installable via `uv pip install` from a local path or git URL, producing a working `af-spec` CLI entry point.
+1. [01-REQ-1.1] THE speclib package SHALL be installable via `uv pip install` from a local path or git URL, producing a working `spec` CLI entry point.
 2. [01-REQ-1.2] THE pyproject.toml SHALL declare `afspec` (speclib-python), `anthropic`, `click`, and `pyyaml` as runtime dependencies with minimum version constraints.
 3. [01-REQ-1.3] THE pyproject.toml SHALL declare `pytest`, `hypothesis`, `ruff`, and `mypy` as dev dependencies.
 4. [01-REQ-1.4] THE pyproject.toml SHALL set `requires-python = ">=3.14"`.

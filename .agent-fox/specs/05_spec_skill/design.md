@@ -3,8 +3,8 @@
 ## Overview
 
 This spec delivers two artifacts: (1) a markdown skill prompt file that
-instructs agent CLIs how to author specs using `af-spec` CLI commands, and
-(2) an `af-spec install-skill` CLI command that copies the skill file to
+instructs agent CLIs how to author specs using `spec` CLI commands, and
+(2) an `spec install-skill` CLI command that copies the skill file to
 the appropriate agent configuration directory. The skill file is
 self-contained, shipped inside the speclib Python package, and requires no
 Python API knowledge from the agent.
@@ -13,23 +13,23 @@ Python API knowledge from the agent.
 
 ```mermaid
 graph TD
-    AGENT["Agent CLI (Claude Code / Gemini CLI)"] -->|loads| SKILL["speclib/skill/af-spec.md"]
-    AGENT -->|invokes| CLI["af-spec CLI (spec 04)"]
+    AGENT["Agent CLI (Claude Code / Gemini CLI)"] -->|loads| SKILL["speclib/skill/spec.md"]
+    AGENT -->|invokes| CLI["spec CLI (spec 04)"]
     CLI --> CAMP["Campaign / SpecSession (spec 02)"]
     CLI --> PIPE["Agent Pipeline (spec 03)"]
-    INSTALL["af-spec install-skill"] -->|copies| SKILL
-    INSTALL -->|writes to| TARGET["~/.claude/skills/af-spec.md"]
+    INSTALL["spec install-skill"] -->|copies| SKILL
+    INSTALL -->|writes to| TARGET["~/.claude/skills/spec.md"]
 ```
 
 ### Module Responsibilities
 
-1. **speclib/skill/af-spec.md** — The skill prompt file. Markdown document
+1. **speclib/skill/spec.md** — The skill prompt file. Markdown document
    containing workflow instructions, command reference, examples, and error
    handling guidance. Loaded by agent CLIs as context.
 2. **speclib/skill/__init__.py** — Package marker. Exports `SKILL_FILE_PATH`
    constant pointing to the skill markdown file within the package.
 3. **speclib/cli.py** (extended) — Adds the `install-skill` subcommand to the
-   existing `af-spec` CLI group defined in spec 04.
+   existing `spec` CLI group defined in spec 04.
 
 ## Execution Paths
 
@@ -37,27 +37,27 @@ graph TD
 
 1. User asks agent to create a spec
 2. Agent reads skill file, follows interactive workflow
-3. Agent runs `af-spec init <campaign-dir>` or opens existing campaign
-4. Agent runs `af-spec new --prd <path> <spec-name>` to create a spec session
-5. Agent runs `af-spec assess <spec-dir>` and presents result to user
+3. Agent runs `spec init <campaign-dir>` or opens existing campaign
+4. Agent runs `spec new --prd <path> <spec-name>` to create a spec session
+5. Agent runs `spec assess <spec-dir>` and presents result to user
 6. Agent parses questions from assess output, presents them conversationally
 7. User answers questions in natural language
-8. Agent maps answers to Question IDs, runs `af-spec refine <spec-dir> --answers '<json>'`
+8. Agent maps answers to Question IDs, runs `spec refine <spec-dir> --answers '<json>'`
 9. Agent repeats assess/refine cycle or asks user to accept
-10. Agent runs `af-spec accept <spec-dir>` to lock the PRD
-11. Agent runs `af-spec generate <spec-dir>` and presents the rendered spec
+10. Agent runs `spec accept <spec-dir>` to lock the PRD
+11. Agent runs `spec generate <spec-dir>` and presents the rendered spec
 
 ### Path 2: One-shot mode workflow (driven by skill instructions)
 
 1. User provides PRD and asks for immediate generation
 2. Agent reads skill file, follows one-shot workflow
-3. Agent runs `af-spec init <campaign-dir>` if needed
-4. Agent runs `af-spec new <prd-file> --one-shot --name <spec-name>`
+3. Agent runs `spec init <campaign-dir>` if needed
+4. Agent runs `spec new <prd-file> --one-shot --name <spec-name>`
 5. Agent presents the final generated spec for review
 
 ### Path 3: Skill installation
 
-1. User runs `af-spec install-skill` (or with `--target`)
+1. User runs `spec install-skill` (or with `--target`)
 2. Command resolves the skill source path from `speclib.skill.SKILL_FILE_PATH`
 3. Command detects target agent CLI or uses `--target` override
 4. Command creates target directory if needed
@@ -66,18 +66,18 @@ graph TD
 
 ## Components and Interfaces
 
-### Skill File (speclib/skill/af-spec.md)
+### Skill File (speclib/skill/spec.md)
 
 The skill file is structured with these sections:
 
 ```markdown
-# af-spec — Spec Authoring Skill
+# spec — Spec Authoring Skill
 
 ## Trigger
 [When to activate this skill]
 
 ## Command Reference
-[All af-spec commands with usage and examples]
+[All spec commands with usage and examples]
 
 ## Interactive Workflow
 [Step-by-step instructions for interactive mode]
@@ -98,7 +98,7 @@ The skill file is structured with these sections:
 # speclib/skill/__init__.py
 from pathlib import Path
 
-SKILL_FILE_PATH: Path = Path(__file__).parent / "af-spec.md"
+SKILL_FILE_PATH: Path = Path(__file__).parent / "spec.md"
 ```
 
 ### install-skill CLI command
@@ -110,7 +110,7 @@ SKILL_FILE_PATH: Path = Path(__file__).parent / "af-spec.md"
 @click.option("--target", type=click.Choice(["claude", "gemini"]),
               default=None, help="Target agent CLI")
 def install_skill(target: str | None) -> None:
-    """Install the af-spec skill to an agent CLI."""
+    """Install the spec skill to an agent CLI."""
     ...
 ```
 
@@ -140,14 +140,14 @@ markdown asset. The install command is a simple file-copy operation.
 ### Property 1: Skill file is package-complete
 
 *For any* installation of the speclib package, the file at
-`speclib/skill/af-spec.md` SHALL exist and be non-empty.
+`speclib/skill/spec.md` SHALL exist and be non-empty.
 
 **Validates: Requirement 05-REQ-1.1**
 
 ### Property 2: Installed skill matches source
 
-*For any* successful `af-spec install-skill` invocation, the installed file
-SHALL be byte-identical to the source `speclib/skill/af-spec.md`.
+*For any* successful `spec install-skill` invocation, the installed file
+SHALL be byte-identical to the source `speclib/skill/spec.md`.
 
 **Validates: Requirements 05-REQ-5.2, 05-REQ-5.4**
 
@@ -166,7 +166,7 @@ contain at least one usage example of that command.
 | No agent CLI detected, no --target | Exit with error listing supported CLIs | 05-REQ-5.E1 |
 | Target skill directory missing | Create directory, then copy | 05-REQ-5.E2 |
 | Skill source file missing from package | Raise SpeclibError | 05-REQ-5.E3 |
-| af-spec not on PATH (in skill) | Skill instructs agent to tell user to install | 05-REQ-6.E1 |
+| spec not on PATH (in skill) | Skill instructs agent to tell user to install | 05-REQ-6.E1 |
 
 ## Technology Stack
 
@@ -190,13 +190,13 @@ A task group is complete when ALL of the following are true:
 
 ## Operational Readiness
 
-- **Packaging:** The skill file (`speclib/skill/af-spec.md`) is included in the
+- **Packaging:** The skill file (`speclib/skill/spec.md`) is included in the
   Python package via `package_data`. No additional build steps required.
-- **Upgrades:** Running `af-spec install-skill` after a package upgrade
+- **Upgrades:** Running `spec install-skill` after a package upgrade
   overwrites the previously installed skill file, keeping agent CLIs in sync
   with the current version.
 - **Rollback:** Removing or replacing the installed skill file
-  (`~/.claude/skills/af-spec.md`) restores the previous agent behavior. No
+  (`~/.claude/skills/spec.md`) restores the previous agent behavior. No
   persistent state is created beyond the copied file.
 - **Monitoring:** The `install-skill` command prints a success or error message
   to stdout/stderr. No additional logging or telemetry is introduced.

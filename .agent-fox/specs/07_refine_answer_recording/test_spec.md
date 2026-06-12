@@ -148,7 +148,7 @@ only questions and answer template, with no qa_exchanges data.
 - Session with assessment and populated qa_exchanges.
 
 **Input:**
-- CLI invocation: `af-spec refine 01` (no `--answers`).
+- CLI invocation: `spec refine 01` (no `--answers`).
 
 **Expected:**
 - JSON output has only `questions` and `answers` keys.

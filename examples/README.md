@@ -2,17 +2,17 @@
 
 ## Init
 
-af-spec init hub_example --description "create the af-hub"
+spec init hub_example --description "create the af-hub"
 
-af-spec -C hub_example new --name "phase1" prd.md
+spec -C hub_example new --name "phase1" prd.md
 
-af-spec -C hub_example status
+spec -C hub_example status
 
 ---
 
 ## PRD refinement
 
-af-spec -C hub_example assess 01_phase1
+spec -C hub_example assess 01_phase1
 
 Quality: needs_refinement
 Summary: The PRD for "phase1" covers user management, API key management, and multi-tenant support for af-hub. It provides a solid background section and a reasonable list of requirements, but it lacks a dedicated **Intent** statement (the goal is implied rather than explicitly stated), has no formal **Goals** section with measurable outcomes, and has no **Non-Goals** section to bound scope. The requirements themselves also contain several ambiguities that need resolution before artifact generation can proceed safely.
@@ -42,9 +42,9 @@ Questions:
 
 ---
 
-af-spec -C examples/hub_example refine 01_phase1 > examples/hub_example/qa1.json
+spec -C examples/hub_example refine 01_phase1 > examples/hub_example/qa1.json
 
-af-spec -C examples/hub_example refine 01_phase1 --answers examples/hub_example/qa1.json
+spec -C examples/hub_example refine 01_phase1 --answers examples/hub_example/qa1.json
 
 --- 
 same as above for qa2.json, qa3.json
@@ -53,6 +53,6 @@ same as above for qa2.json, qa3.json
 
 ## Finaize the spec
 
-af-spec -C examples/hub_example accept 01_phase1
+spec -C examples/hub_example accept 01_phase1
 
-af-spec -C examples/hub_example generate 01_phase1
+spec -C examples/hub_example generate 01_phase1

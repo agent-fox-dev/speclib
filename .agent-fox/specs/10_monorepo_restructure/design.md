@@ -193,7 +193,7 @@ spec-cli = { path = "packages/spec-cli", editable = true }
 
 ### CLI Interface
 
-The `spec` command group has the same interface as the current `af-spec`:
+The `spec` command group has the same interface as the current `spec`:
 
 ```
 spec [--campaign-dir PATH] [--quiet] [--version]
@@ -259,7 +259,7 @@ dependencies needed for `P` to function.
 
 *For any* subcommand `S` of the `spec` CLI, invoking `spec S <args>`
 SHALL produce the same stdout/stderr output and exit code as the
-previous `af-spec S <args>` (excluding the program name in help/version
+pre-restructure CLI (excluding the program name in help/version
 output).
 
 **Validates: Requirements 10-REQ-6.5, 10-REQ-2.4**

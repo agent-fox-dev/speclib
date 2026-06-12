@@ -153,7 +153,7 @@ class TestEdgeCases:
         Verifies that README.md mentions uv and does not include bare
         ``pip install`` instructions (``uv pip install`` is acceptable).
         """
-        readme = PROJECT_ROOT / "README.md"
+        readme = PROJECT_ROOT / "packages" / "README.md"
         assert readme.exists(), "README.md must exist"
         content = readme.read_text()
         assert "uv" in content, "README must mention uv as required tool"

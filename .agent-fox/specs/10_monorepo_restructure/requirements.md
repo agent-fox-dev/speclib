@@ -89,7 +89,7 @@ command line without needing to know about the library internals.
    dependencies on `click` and `rich` (the CLI-specific dependencies).
 
 4. [10-REQ-2.4] THE `spec` CLI SHALL provide the same subcommands as
-   the current `af-spec` CLI: `init`, `list`, `new`, `assess`, `refine`,
+   the current `spec` CLI: `init`, `list`, `new`, `assess`, `refine`,
    `accept`, `generate`, `validate`, `render`, `show`, `status`, and
    `install-skill`.
 
@@ -98,12 +98,12 @@ command line without needing to know about the library internals.
    from the `speclib` package.
 
 6. [10-REQ-2.6] THE `packages/spec-cli/` directory SHALL contain the
-   `skill/` subdirectory with `__init__.py` and `af-spec.md`.
+   `skill/` subdirectory with `__init__.py` and `spec.md`.
 
 #### Edge Cases
 
 1. [10-REQ-2.E1] IF a user runs `spec --help`, THEN THE CLI SHALL
-   display help text with the program name `spec` (not `af-spec`).
+   display help text with the program name `spec`.
 
 2. [10-REQ-2.E2] IF the `speclib` dependency is not installed, THEN
    running `spec` SHALL raise an `ImportError` with a message indicating
@@ -223,7 +223,7 @@ is lost during the restructure.
    `spec_cli.ui` (the co-located UI module within the CLI package).
 
 5. [10-REQ-6.5] WHEN the restructure is complete, THE `spec` CLI SHALL
-   produce identical output for all subcommands as the previous `af-spec`
+   produce identical output for all subcommands as the pre-restructure
    CLI (except for the program name in help text).
 
 #### Edge Cases

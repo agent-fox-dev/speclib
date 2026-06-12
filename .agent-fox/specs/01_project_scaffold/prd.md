@@ -55,7 +55,7 @@ being complete.
 
 ## Design Decisions
 
-1. **Package name:** `speclib`. The CLI entry point is `af-spec` (matching the
+1. **Package name:** `speclib`. The CLI entry point is `spec` (matching the
    architecture specification).
 2. **Build system:** `hatchling` (same as afspec) with `uv` as the only
    supported installer. No pip.

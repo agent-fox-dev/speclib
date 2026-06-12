@@ -66,7 +66,7 @@ before the install command, and wiring verification is last.
     - _Requirements: 05-REQ-1.1_
 
   - [x] 2.2 Write the skill prompt file
-    - Create `speclib/skill/af-spec.md` with all required sections:
+    - Create `speclib/skill/spec.md` with all required sections:
       - Header with skill name, description, trigger conditions
       - Command Reference section with all 9 commands and examples
       - Interactive Workflow section with numbered steps
@@ -131,8 +131,8 @@ before the install command, and wiring verification is last.
 
   - [x] 4.4 Cross-spec entry point verification
     - Verify `SKILL_FILE_PATH` is importable from `speclib.skill`
-    - Verify `install-skill` subcommand appears in `af-spec --help` output
-    - Verify skill file references to af-spec commands match the CLI defined in spec 04
+    - Verify `install-skill` subcommand appears in `spec --help` output
+    - Verify skill file references to spec commands match the CLI defined in spec 04
     - _Requirements: all_
 
   - [x] 4.V Verify wiring group

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Tests verify the question-export behavior of `af-spec refine` when called
+Tests verify the question-export behavior of `spec refine` when called
 without `--answers`, the `pending_questions()` session method, and that
 existing answer-submission behavior is preserved.
 
@@ -20,7 +20,7 @@ to stdout and exits 0.
 - Session has at least one assessment with questions.
 
 **Input:**
-- CLI invocation: `af-spec --campaign-dir <dir> refine 01` (no `--answers`).
+- CLI invocation: `spec --campaign-dir <dir> refine 01` (no `--answers`).
 
 **Expected:**
 - Exit code 0.
@@ -46,7 +46,7 @@ required fields.
 - Session assessment has questions with all fields populated.
 
 **Input:**
-- CLI invocation: `af-spec refine 01` (no `--answers`).
+- CLI invocation: `spec refine 01` (no `--answers`).
 
 **Expected:**
 - Each item in `questions` array has keys: `id`, `text`, `context`, `options`,
@@ -70,7 +70,7 @@ each mapped to an empty string.
 - Session assessment has questions with IDs `q1`, `q2`.
 
 **Input:**
-- CLI invocation: `af-spec refine 01` (no `--answers`).
+- CLI invocation: `spec refine 01` (no `--answers`).
 
 **Expected:**
 - `answers` is `{"q1": "", "q2": ""}`.
@@ -95,7 +95,7 @@ ASSERT all(v == "" for v in data["answers"].values())
 - Valid answers file exists.
 
 **Input:**
-- CLI invocation: `af-spec refine 01 --answers answers.json`.
+- CLI invocation: `spec refine 01 --answers answers.json`.
 
 **Expected:**
 - `session.refine()` is called with the answers dict.
@@ -122,7 +122,7 @@ session with no assessment.
 - Session exists but has no assessment history.
 
 **Input:**
-- CLI invocation: `af-spec refine 01` (no `--answers`).
+- CLI invocation: `spec refine 01` (no `--answers`).
 
 **Expected:**
 - Exit code 1.
@@ -145,7 +145,7 @@ ASSERT "no assessment" IN result.output.lower() OR "assessment" IN result.output
 - Session has an assessment with quality "ready" and empty questions list.
 
 **Input:**
-- CLI invocation: `af-spec refine 01` (no `--answers`).
+- CLI invocation: `spec refine 01` (no `--answers`).
 
 **Expected:**
 - Exit code 0.
@@ -277,7 +277,7 @@ resume to JSON output on stdout.
 `_session.json` file with an assessment that has questions. No mocking of
 `SpecSession` or `pending_questions`.
 
-**Trigger:** `af-spec --campaign-dir <dir> refine <spec>` (no `--answers`).
+**Trigger:** `spec --campaign-dir <dir> refine <spec>` (no `--answers`).
 
 **Expected side effects:**
 - stdout contains valid JSON.

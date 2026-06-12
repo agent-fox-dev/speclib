@@ -48,13 +48,13 @@ class TestSkillHeader:
     """TS-05-2: Verify skill file includes header with name and trigger."""
 
     def test_skill_header_has_name(self) -> None:
-        """Skill file contains a top-level heading with 'af-spec'."""
+        """Skill file contains a top-level heading with 'spec'."""
         from spec_cli.skill import SKILL_FILE_PATH
 
         content = SKILL_FILE_PATH.read_text()
-        # Check for a markdown heading containing af-spec (case-insensitive)
-        assert re.search(r"^#\s+.*af-spec", content, re.IGNORECASE | re.MULTILINE), (
-            "Skill file must contain a top-level heading with 'af-spec'"
+        # Check for a markdown heading containing spec (case-insensitive)
+        assert re.search(r"^#\s+.*spec", content, re.IGNORECASE | re.MULTILINE), (
+            "Skill file must contain a top-level heading with 'spec'"
         )
 
     def test_skill_header_has_trigger(self) -> None:
@@ -74,23 +74,23 @@ class TestSkillHeader:
 
 
 class TestDocumentsAllCommands:
-    """TS-05-3: Verify the skill file mentions all required af-spec CLI commands."""
+    """TS-05-3: Verify the skill file mentions all required spec CLI commands."""
 
     def test_documents_all_commands(self) -> None:
-        """Skill file references all required af-spec commands."""
+        """Skill file references all required spec commands."""
         from spec_cli.skill import SKILL_FILE_PATH
 
         content = SKILL_FILE_PATH.read_text()
         required_commands = [
-            "af-spec init",
-            "af-spec new",
-            "af-spec assess",
-            "af-spec refine",
-            "af-spec accept",
-            "af-spec generate",
-            "af-spec status",
-            "af-spec validate",
-            "af-spec render",
+            "spec init",
+            "spec new",
+            "spec assess",
+            "spec refine",
+            "spec accept",
+            "spec generate",
+            "spec status",
+            "spec validate",
+            "spec render",
         ]
         for cmd in required_commands:
             assert cmd in content, (
@@ -118,8 +118,8 @@ class TestCommandExamples:
             "generate", "status", "validate", "render",
         ]
         for cmd in required_commands:
-            assert any(f"af-spec {cmd}" in block for block in code_blocks), (
-                f"Skill file must include a code block example for 'af-spec {cmd}'"
+            assert any(f"spec {cmd}" in block for block in code_blocks), (
+                f"Skill file must include a code block example for 'spec {cmd}'"
             )
 
 
@@ -363,12 +363,12 @@ class TestStatusCheck:
     """TS-05-21: Verify the skill file instructs checking session state."""
 
     def test_status_check_before_operations(self) -> None:
-        """Skill file instructs using 'af-spec status' to check state."""
+        """Skill file instructs using 'spec status' to check state."""
         from spec_cli.skill import SKILL_FILE_PATH
 
         content = SKILL_FILE_PATH.read_text()
-        assert "af-spec status" in content, (
-            "Skill file must reference 'af-spec status'"
+        assert "spec status" in content, (
+            "Skill file must reference 'spec status'"
         )
         has_state_ref = "state" in content.lower() or "status" in content.lower()
         assert has_state_ref, (
@@ -513,7 +513,7 @@ class TestProperties:
 
         Property 3 from design.md.
         Validates: 05-REQ-1.3, 05-REQ-1.4.
-        For any required command, 'af-spec {command}' appears in the skill file.
+        For any required command, 'spec {command}' appears in the skill file.
         """
         from spec_cli.skill import SKILL_FILE_PATH
 
@@ -523,6 +523,6 @@ class TestProperties:
             "generate", "status", "validate", "render",
         ]
         for cmd in required_commands:
-            assert f"af-spec {cmd}" in content, (
-                f"Skill file must document 'af-spec {cmd}'"
+            assert f"spec {cmd}" in content, (
+                f"Skill file must document 'spec {cmd}'"
             )

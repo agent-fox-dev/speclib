@@ -1,8 +1,8 @@
-# Test Specification: af-spec CLI
+# Test Specification: spec CLI
 
 ## Overview
 
-Tests validate the af-spec CLI commands using Click's CliRunner for isolated
+Tests validate the spec CLI commands using Click's CliRunner for isolated
 command invocation. Business logic (Campaign, SpecSession) is mocked in unit
 tests and used directly in integration tests. Test cases map 1:1 to
 requirements; property tests verify resolution and error invariants.
@@ -13,14 +13,14 @@ requirements; property tests verify resolution and error invariants.
 
 **Requirement:** 04-REQ-1.1
 **Type:** unit
-**Description:** Verify `af-spec init` calls Campaign.create and prints confirmation.
+**Description:** Verify `spec init` calls Campaign.create and prints confirmation.
 
 **Preconditions:**
 - Temp directory exists for target path
 - Campaign.create is mocked
 
 **Input:**
-- Invoke `af-spec init /tmp/test-campaign --name "Test" --description "A test"`
+- Invoke `spec init /tmp/test-campaign --name "Test" --description "A test"`
 
 **Expected:**
 - Campaign.create called with (path, "Test", "A test")
@@ -47,7 +47,7 @@ with mock Campaign.create:
 - Temp directory named "my-project"
 
 **Input:**
-- Invoke `af-spec init /tmp/my-project`
+- Invoke `spec init /tmp/my-project`
 
 **Expected:**
 - Campaign.create called with name="my-project"
@@ -71,7 +71,7 @@ with mock Campaign.create:
 - Temp directory
 
 **Input:**
-- Invoke `af-spec init /tmp/test --name "Test"`
+- Invoke `spec init /tmp/test --name "Test"`
 
 **Expected:**
 - Campaign.create called with description=""
@@ -94,7 +94,7 @@ with mock Campaign.create:
 - Campaign.create mocked to raise CampaignError("already exists")
 
 **Input:**
-- Invoke `af-spec init /tmp/existing`
+- Invoke `spec init /tmp/existing`
 
 **Expected:**
 - Error message printed to stderr
@@ -119,7 +119,7 @@ with mock Campaign.create raising CampaignError("already exists"):
 - CWD is /tmp
 
 **Input:**
-- Invoke `af-spec init ./my-campaign --name "Test"`
+- Invoke `spec init ./my-campaign --name "Test"`
 
 **Expected:**
 - Campaign.create called with an absolute path
@@ -142,7 +142,7 @@ with mock Campaign.create:
 - Campaign with two specs, mocked sessions in different states
 
 **Input:**
-- Invoke `af-spec list` from campaign directory
+- Invoke `spec list` from campaign directory
 
 **Expected:**
 - Output contains table with columns for number, name, state, artifacts
@@ -169,7 +169,7 @@ with mock Campaign.open returning campaign with specs:
 - Campaign directory at a known path
 
 **Input:**
-- Invoke `af-spec list /path/to/campaign`
+- Invoke `spec list /path/to/campaign`
 
 **Expected:**
 - Campaign.open called with the provided path
@@ -194,7 +194,7 @@ with mock Campaign.open:
 - Campaign with no spec subdirectories
 
 **Input:**
-- Invoke `af-spec list`
+- Invoke `spec list`
 
 **Expected:**
 - Output indicates campaign is empty
@@ -219,7 +219,7 @@ with mock Campaign returning empty specs list:
 - Campaign with specs 03, 01, 02 (out of order internally)
 
 **Input:**
-- Invoke `af-spec list`
+- Invoke `spec list`
 
 **Expected:**
 - Output shows specs in order: 01, 02, 03
@@ -244,7 +244,7 @@ ASSERT pos_01 < pos_02 < pos_03
 - CWD is a directory without campaign.yaml
 
 **Input:**
-- Invoke `af-spec list`
+- Invoke `spec list`
 
 **Expected:**
 - Error message about campaign directory
@@ -270,7 +270,7 @@ with mock Campaign.open raising CampaignError:
 - PRD file exists at given path
 
 **Input:**
-- Invoke `af-spec new /path/to/prd.md`
+- Invoke `spec new /path/to/prd.md`
 
 **Expected:**
 - campaign.new_spec called with PRD content
@@ -297,7 +297,7 @@ with mock campaign.new_spec returning session:
 - Campaign and PRD file exist
 
 **Input:**
-- Invoke `af-spec new prd.md --name my_spec`
+- Invoke `spec new prd.md --name my_spec`
 
 **Expected:**
 - campaign.new_spec called with name="my_spec"
@@ -320,7 +320,7 @@ with mock campaign.new_spec:
 - PRD file named "My Data Models.md"
 
 **Input:**
-- Invoke `af-spec new "My Data Models.md"`
+- Invoke `spec new "My Data Models.md"`
 
 **Expected:**
 - Derived name is "my_data_models"
@@ -343,7 +343,7 @@ with mock campaign.new_spec:
 - Campaign and PRD file exist
 
 **Input:**
-- Invoke `af-spec new prd.md --one-shot`
+- Invoke `spec new prd.md --one-shot`
 
 **Expected:**
 - campaign.new_spec called with mode="one-shot"
@@ -367,7 +367,7 @@ with mock campaign.new_spec:
 - PRD file path points to non-existent file
 
 **Input:**
-- Invoke `af-spec new /tmp/nonexistent.md`
+- Invoke `spec new /tmp/nonexistent.md`
 
 **Expected:**
 - Error message about missing file
@@ -390,7 +390,7 @@ ASSERT result.exit_code != 0
 - Campaign and PRD file exist
 
 **Input:**
-- Invoke `af-spec new prd.md --name "Invalid Name!"`
+- Invoke `spec new prd.md --name "Invalid Name!"`
 
 **Expected:**
 - Error about naming rules
@@ -415,7 +415,7 @@ with mock campaign.new_spec raising CampaignError("invalid name"):
 - session.assess mocked to return assessment result
 
 **Input:**
-- Invoke `af-spec assess 01`
+- Invoke `spec assess 01`
 
 **Expected:**
 - session.assess called
@@ -441,7 +441,7 @@ with mock session.assess returning assessment:
 - Mocked assessment with quality, gaps, and questions
 
 **Input:**
-- Invoke `af-spec assess 01`
+- Invoke `spec assess 01`
 
 **Expected:**
 - Output contains section headers for quality, gaps, questions
@@ -466,7 +466,7 @@ with mock session.assess returning full assessment:
 - Session in generated state
 
 **Input:**
-- Invoke `af-spec assess 01`
+- Invoke `spec assess 01`
 
 **Expected:**
 - Error about current state
@@ -491,7 +491,7 @@ with mock session.assess raising SessionError("wrong state"):
 - session.assess raises unexpected exception
 
 **Input:**
-- Invoke `af-spec assess 01`
+- Invoke `spec assess 01`
 
 **Expected:**
 - Error to stderr
@@ -516,7 +516,7 @@ with mock session.assess raising RuntimeError("agent failed"):
 - Answers JSON file exists with valid content
 
 **Input:**
-- Invoke `af-spec refine 01 --answers answers.json`
+- Invoke `spec refine 01 --answers answers.json`
 
 **Expected:**
 - session.refine called with parsed answers
@@ -543,7 +543,7 @@ with temp file "answers.json" = '{"q1": "answer1"}':
 - No file at given path
 
 **Input:**
-- Invoke `af-spec refine 01 --answers /tmp/nonexistent.json`
+- Invoke `spec refine 01 --answers /tmp/nonexistent.json`
 
 **Expected:**
 - Error message
@@ -566,7 +566,7 @@ ASSERT result.exit_code != 0
 - Answers file contains invalid JSON
 
 **Input:**
-- Invoke `af-spec refine 01 --answers bad.json`
+- Invoke `spec refine 01 --answers bad.json`
 
 **Expected:**
 - Parse error message
@@ -591,7 +591,7 @@ with temp file "bad.json" = "{not valid json":
 - Session in init state
 
 **Input:**
-- Invoke `af-spec refine 01 --answers answers.json`
+- Invoke `spec refine 01 --answers answers.json`
 
 **Expected:**
 - Error about required state
@@ -616,7 +616,7 @@ with mock session.refine raising SessionError("not in refining state"):
 - session.refine returns updated assessment
 
 **Input:**
-- Invoke `af-spec refine 01 --answers answers.json`
+- Invoke `spec refine 01 --answers answers.json`
 
 **Expected:**
 - Output contains assessment summary (quality, gaps, questions)
@@ -640,7 +640,7 @@ with mock session.refine returning assessment:
 - Answers file contains valid JSON but wrong structure (e.g., a list)
 
 **Input:**
-- Invoke `af-spec refine 01 --answers bad_schema.json`
+- Invoke `spec refine 01 --answers bad_schema.json`
 
 **Expected:**
 - Schema validation error
@@ -664,7 +664,7 @@ with temp file "bad_schema.json" = '["not", "an", "object"]':
 - Session in assessing or refining state
 
 **Input:**
-- Invoke `af-spec accept 01`
+- Invoke `spec accept 01`
 
 **Expected:**
 - session.accept_prd called
@@ -690,7 +690,7 @@ with mock session.accept_prd:
 - Session in init state
 
 **Input:**
-- Invoke `af-spec accept 01`
+- Invoke `spec accept 01`
 
 **Expected:**
 - Error about current state
@@ -716,7 +716,7 @@ with mock session.accept_prd raising SessionError:
 - session.generate mocked to return artifact list
 
 **Input:**
-- Invoke `af-spec generate 01`
+- Invoke `spec generate 01`
 
 **Expected:**
 - session.generate called
@@ -742,7 +742,7 @@ with mock session.generate returning ["requirements.md", "design.md", "test_spec
 - Session in init state
 
 **Input:**
-- Invoke `af-spec generate 01`
+- Invoke `spec generate 01`
 
 **Expected:**
 - Error about accepting PRD first
@@ -767,7 +767,7 @@ with mock session raising SessionError("not in prd_accepted"):
 - session.generate raises unexpected exception
 
 **Input:**
-- Invoke `af-spec generate 01`
+- Invoke `spec generate 01`
 
 **Expected:**
 - Error to stderr
@@ -791,7 +791,7 @@ with mock session.generate raising RuntimeError("agent failed"):
 - Session with all artifacts, validation returns no errors
 
 **Input:**
-- Invoke `af-spec validate 01`
+- Invoke `spec validate 01`
 
 **Expected:**
 - Success message
@@ -816,7 +816,7 @@ with mock session.validate returning ValidationResult(valid=True, errors=[]):
 - Validation returns errors
 
 **Input:**
-- Invoke `af-spec validate 01`
+- Invoke `spec validate 01`
 
 **Expected:**
 - Error table with file, path, message columns
@@ -842,7 +842,7 @@ with mock session.validate returning errors:
 - Session raises SessionError about missing artifacts
 
 **Input:**
-- Invoke `af-spec validate 01`
+- Invoke `spec validate 01`
 
 **Expected:**
 - Error listing missing artifacts
@@ -867,7 +867,7 @@ with mock session.validate raising SessionError("missing artifacts"):
 - Session with all artifacts, render returns markdown string
 
 **Input:**
-- Invoke `af-spec render 01`
+- Invoke `spec render 01`
 
 **Expected:**
 - Markdown content on stdout
@@ -892,7 +892,7 @@ with mock session.render returning "# Spec Title\n\n## Requirements\n...":
 - Session with all artifacts
 
 **Input:**
-- Invoke `af-spec render 01 --combined`
+- Invoke `spec render 01 --combined`
 
 **Expected:**
 - session.render called with combined=True
@@ -915,7 +915,7 @@ with mock session.render:
 - Session with all artifacts
 
 **Input:**
-- Invoke `af-spec render 01`
+- Invoke `spec render 01`
 
 **Expected:**
 - session.render called with combined=False
@@ -939,7 +939,7 @@ with mock session.render(combined=False) returning dict:
 - Session raises SessionError about missing artifacts
 
 **Input:**
-- Invoke `af-spec render 01`
+- Invoke `spec render 01`
 
 **Expected:**
 - Error listing missing artifacts
@@ -964,7 +964,7 @@ with mock session.render raising SessionError("missing artifacts"):
 - Campaign with multiple specs
 
 **Input:**
-- Invoke `af-spec status`
+- Invoke `spec status`
 
 **Expected:**
 - Table showing all specs with their states
@@ -990,7 +990,7 @@ with mock campaign with specs:
 - Campaign with spec 01
 
 **Input:**
-- Invoke `af-spec status 01`
+- Invoke `spec status 01`
 
 **Expected:**
 - Detailed state: state name, mode, assessment count, Q&A count, artifacts
@@ -1016,7 +1016,7 @@ with mock session with state data:
 - Campaign with spec
 
 **Input:**
-- Invoke `af-spec show 01`
+- Invoke `spec show 01`
 
 **Expected:**
 - Session state summary displayed
@@ -1041,7 +1041,7 @@ with mock session:
 - Spec directory with prd.md file
 
 **Input:**
-- Invoke `af-spec show 01 --artifact prd.md`
+- Invoke `spec show 01 --artifact prd.md`
 
 **Expected:**
 - Content of prd.md printed to stdout
@@ -1066,7 +1066,7 @@ with spec dir containing prd.md:
 - Spec directory without the requested artifact
 
 **Input:**
-- Invoke `af-spec show 01 --artifact nonexistent.md`
+- Invoke `spec show 01 --artifact nonexistent.md`
 
 **Expected:**
 - Error listing available artifacts
@@ -1090,7 +1090,7 @@ ASSERT "available" in result.output.lower() or "prd.md" in result.output
 - Campaign with specs 01 and 02
 
 **Input:**
-- Invoke `af-spec assess 99`
+- Invoke `spec assess 99`
 
 **Expected:**
 - Error listing available specs (01, 02)
@@ -1116,7 +1116,7 @@ with campaign containing specs 01 and 02:
 - Campaign at /tmp/my-campaign, CWD is /tmp
 
 **Input:**
-- Invoke `af-spec --campaign-dir /tmp/my-campaign list`
+- Invoke `spec --campaign-dir /tmp/my-campaign list`
 
 **Expected:**
 - Campaign opened from /tmp/my-campaign, not CWD
@@ -1139,7 +1139,7 @@ with mock Campaign.open:
 - CWD has no campaign.yaml
 
 **Input:**
-- Invoke `af-spec status`
+- Invoke `spec status`
 
 **Expected:**
 - Error message about campaign directory with --campaign-dir hint
@@ -1165,7 +1165,7 @@ with mock Campaign.open raising CampaignError:
 - Campaign with spec "01_data_models"
 
 **Input:**
-- Invoke `af-spec status 01_data_models`
+- Invoke `spec status 01_data_models`
 
 **Expected:**
 - Spec resolved to 01_data_models directory
@@ -1189,7 +1189,7 @@ with campaign containing "01_data_models":
 - Campaign with spec "01_data_models"
 
 **Input:**
-- Invoke `af-spec status 01`
+- Invoke `spec status 01`
 
 **Expected:**
 - Spec resolved to 01_data_models directory
@@ -1213,7 +1213,7 @@ with campaign containing "01_data_models":
 - Valid campaign and spec
 
 **Input:**
-- Invoke `af-spec status 01` (any successful command)
+- Invoke `spec status 01` (any successful command)
 
 **Expected:**
 - Exit code 0
@@ -1524,8 +1524,8 @@ FOR ANY (cmd, valid_states, invalid_states) IN state_gates:
 **Setup:** Temp directory, no prior campaign.
 
 **Trigger:**
-1. `af-spec init <tmp> --name "Test"`
-2. `af-spec --campaign-dir <tmp> list`
+1. `spec init <tmp> --name "Test"`
+2. `spec --campaign-dir <tmp> list`
 
 **Expected side effects:**
 - Init creates directory with campaign.yaml
@@ -1552,8 +1552,8 @@ ASSERT "empty" in result2.output.lower() or "no specs" in result2.output.lower()
 **Setup:** Existing campaign directory, PRD file.
 
 **Trigger:**
-1. `af-spec --campaign-dir <tmp> new prd.md --name test_spec`
-2. `af-spec --campaign-dir <tmp> status 01`
+1. `spec --campaign-dir <tmp> new prd.md --name test_spec`
+2. `spec --campaign-dir <tmp> status 01`
 
 **Expected side effects:**
 - New creates spec directory with prd.md and _session.json
@@ -1581,7 +1581,7 @@ ASSERT "init" in result2.output.lower()
 
 **Setup:** Campaign with spec containing prd.md.
 
-**Trigger:** `af-spec --campaign-dir <tmp> show 01 --artifact prd.md`
+**Trigger:** `spec --campaign-dir <tmp> show 01 --artifact prd.md`
 
 **Expected side effects:**
 - PRD content printed to stdout
@@ -1606,8 +1606,8 @@ ASSERT "Test PRD" in result.output or prd_content in result.output
 **Setup:** Campaign with spec in generated state (all artifacts present).
 
 **Trigger:**
-1. `af-spec --campaign-dir <tmp> validate 01`
-2. `af-spec --campaign-dir <tmp> render 01`
+1. `spec --campaign-dir <tmp> validate 01`
+2. `spec --campaign-dir <tmp> render 01`
 
 **Expected side effects:**
 - Validate reports results (pass or fail)

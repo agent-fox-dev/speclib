@@ -1,4 +1,4 @@
-"""Tests for the af-spec CLI commands.
+"""Tests for the spec CLI commands.
 
 Test Spec Entries: TS-04-1 through TS-04-51, TS-04-P1 through TS-04-P5,
 TS-04-SMOKE-1 through TS-04-SMOKE-4.
@@ -183,7 +183,7 @@ def _assert_exit(result: Any, code: int) -> None:
 
 
 class TestInitCommand:
-    """Tests for the af-spec init command."""
+    """Tests for the spec init command."""
 
     def test_init_creates_campaign(
         self, cli_runner: CliRunner, tmp_path: Path
@@ -191,7 +191,7 @@ class TestInitCommand:
         """TS-04-1: Init creates campaign directory.
 
         Requirement: 04-REQ-1.1
-        Verify af-spec init calls Campaign.create and prints
+        Verify spec init calls Campaign.create and prints
         confirmation.
         """
         target = tmp_path / "test-campaign"
@@ -325,7 +325,7 @@ class TestInitCommand:
 
 
 class TestListCommand:
-    """Tests for the af-spec list command."""
+    """Tests for the spec list command."""
 
     def test_list_displays_table(
         self,
@@ -638,7 +638,7 @@ class TestExitCodes:
 
 
 class TestNewCommand:
-    """Tests for the af-spec new command."""
+    """Tests for the spec new command."""
 
     def test_new_creates_spec(
         self,
@@ -836,7 +836,7 @@ class TestNewCommand:
 
 
 class TestAssessCommand:
-    """Tests for the af-spec assess command."""
+    """Tests for the spec assess command."""
 
     def test_assess_runs_and_prints(
         self,
@@ -965,7 +965,7 @@ class TestAssessCommand:
 
 
 class TestRefineCommand:
-    """Tests for the af-spec refine command."""
+    """Tests for the spec refine command."""
 
     def test_refine_submits_answers(
         self,
@@ -1520,7 +1520,7 @@ class TestRefineQuestionExportSmoke:
 
 
 class TestAcceptCommand:
-    """Tests for the af-spec accept command."""
+    """Tests for the spec accept command."""
 
     def test_accept_transitions_state(
         self,
@@ -1579,7 +1579,7 @@ class TestAcceptCommand:
 
 
 class TestGenerateCommand:
-    """Tests for the af-spec generate command."""
+    """Tests for the spec generate command."""
 
     def test_generate_runs_and_prints(
         self,
@@ -1676,7 +1676,7 @@ class TestGenerateCommand:
 
 
 class TestValidateCommand:
-    """Tests for the af-spec validate command."""
+    """Tests for the spec validate command."""
 
     def test_validate_passing(
         self,
@@ -1789,7 +1789,7 @@ class TestValidateCommand:
 
 
 class TestRenderCommand:
-    """Tests for the af-spec render command."""
+    """Tests for the spec render command."""
 
     def test_render_outputs_markdown(
         self,
@@ -1910,7 +1910,7 @@ class TestRenderCommand:
 
 
 class TestStatusCommand:
-    """Tests for the af-spec status command."""
+    """Tests for the spec status command."""
 
     def test_status_all_specs(
         self,
@@ -1960,7 +1960,7 @@ class TestStatusCommand:
 
 
 class TestShowCommand:
-    """Tests for the af-spec show command."""
+    """Tests for the spec show command."""
 
     def test_show_session_state(
         self,

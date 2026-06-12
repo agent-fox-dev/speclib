@@ -8,8 +8,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-SKILL_FILE_PATH: Path = Path(__file__).parent / "af-spec.md"
-"""Absolute path to the af-spec skill markdown file within the package."""
+SKILL_FILE_PATH: Path = Path(__file__).parent / "spec.md"
+"""Absolute path to the spec skill markdown file within the package."""
 
 AGENT_TARGETS: dict[str, Path] = {
     "claude": Path(".claude") / "skills",

@@ -17,7 +17,7 @@ spec 03 provides their agent implementations.
 
 ```mermaid
 graph TD
-    CLI["af-spec CLI (spec 04)"] --> CAMP["speclib.campaign"]
+    CLI["spec CLI (spec 04)"] --> CAMP["speclib.campaign"]
     CLI --> SESS["speclib.session"]
     SKILL["Spec Skill (spec 05)"] --> CAMP
     SKILL --> SESS

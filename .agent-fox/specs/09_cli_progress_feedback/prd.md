@@ -9,13 +9,13 @@ output for scripted use.
 
 ## Background
 
-Currently, the `af-spec` CLI gives no visual feedback during long-running
+Currently, the `spec` CLI gives no visual feedback during long-running
 operations. Commands like `assess` and `generate` make API calls that can
 take 10-60 seconds. During this time the terminal is completely silent — the
 user has no way to know whether the tool is working, stuck, or crashed.
 
 The `agent-fox` project uses Rich's `Live` display with animated braille
-spinners and phase messages to provide real-time feedback. The `af-spec` CLI
+spinners and phase messages to provide real-time feedback. The `spec` CLI
 should adopt a similar but simpler pattern — it has fewer concurrent tasks
 and a more linear flow.
 
@@ -70,7 +70,7 @@ and a more linear flow.
 ## Non-Goals
 
 - Progress bars with percentage (API calls have no progress increments).
-- Concurrent task display (af-spec is sequential).
+- Concurrent task display (spec is sequential).
 - Token counting or turn display (unnecessary for this tool).
 - Colorized output beyond what Rich provides by default.
 

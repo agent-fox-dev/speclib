@@ -67,12 +67,12 @@ display the refinement history.
 
 ### Requirement 3: No Side Effects on Existing Interfaces
 
-**User Story:** As a user of `af-spec refine` and `af-spec refine` (without
+**User Story:** As a user of `spec refine` and `spec refine` (without
 answers), I want the existing behavior to remain unchanged.
 
 #### Acceptance Criteria
 
-1. [07-REQ-3.1] WHEN `af-spec refine <spec>` is invoked without `--answers`,
+1. [07-REQ-3.1] WHEN `spec refine <spec>` is invoked without `--answers`,
    THE CLI SHALL output the same question-export JSON as before, with no
    `qa_exchanges` information included.
 

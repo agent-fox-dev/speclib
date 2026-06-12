@@ -211,9 +211,9 @@ updated_at: "2026-06-09T10:00:00Z"
 | `created_at` | ISO 8601 datetime | yes | When the campaign was created. Immutable. |
 | `updated_at` | ISO 8601 datetime | yes | Last modification timestamp. |
 
-This is lighter than a spec PRD: no Intent hash, no schema validation, no freeze. The campaign directory and `campaign.yaml` are created by `af-spec init` (see [services-architecture.md §7.2](services-architecture.md#72-af-spec-cli)).
+This is lighter than a spec PRD: no Intent hash, no schema validation, no freeze. The campaign directory and `campaign.yaml` are created by `spec init` (see [services-architecture.md §7.2](services-architecture.md#72-spec-cli)).
 
-**Filesystem vs. hub.** `campaign.yaml` on the filesystem is the authoring-time copy, created and edited by `af-spec`. When a spec is submitted to the hub (`af-spec submit`), the hub reads `campaign.yaml` and replicates its fields into the operational store's `Campaign` table. The hub supplements this with execution-time state that only the hub manages: campaign status (`active`/`complete`/`abandoned`), shared Context ids, and workspace bindings. The hub's operational store is the source of truth for campaign state at execution time; the filesystem copy is the source of truth during authoring.
+**Filesystem vs. hub.** `campaign.yaml` on the filesystem is the authoring-time copy, created and edited by `spec`. When a spec is submitted to the hub (`spec submit`), the hub reads `campaign.yaml` and replicates its fields into the operational store's `Campaign` table. The hub supplements this with execution-time state that only the hub manages: campaign status (`active`/`complete`/`abandoned`), shared Context ids, and workspace bindings. The hub's operational store is the source of truth for campaign state at execution time; the filesystem copy is the source of truth during authoring.
 
 ### 4.3 The dependency graph
 
@@ -247,7 +247,7 @@ When a campaign is registered with the hub, the Operator may declare Contexts th
 
 ### 4.7 What a Campaign is not
 
-A Campaign is not a spec (no `requirements.json`, no freeze, no traceability). It is not a workspace (no worktree, no agents). It does not replace spec authoring: specs are still authored one at a time, either through the standalone `af-spec` tool or through the harness Planner (see §5).
+A Campaign is not a spec (no `requirements.json`, no freeze, no traceability). It is not a workspace (no worktree, no agents). It does not replace spec authoring: specs are still authored one at a time, either through the standalone `spec` tool or through the harness Planner (see §5).
 
 ---
 
@@ -281,7 +281,7 @@ For artifact structure, field definitions, and schema details, see [spec-format_
 
 Specs are stored in the spec store on the filesystem, organized under their parent campaign: `<data_dir>/specs/<campaign-slug>/<spec-slug>/`. The spec-slug follows the `{NN}_{snake_case_name}` convention from the format spec. The numeric prefix is auto-assigned as `max(existing) + 1` within the campaign; collisions are rejected.
 
-Spec creation is handled by **speclib**, a shared library used by both the standalone `af-spec` CLI and the harness Planner. During creation speclib operates in bootstrap mode, writing the four artifacts sequentially and deferring cross-artifact validation until all four exist. See [services-architecture.md §7](services-architecture.md#7-the-spec-creation-tool) for the full spec creation tool description.
+Spec creation is handled by **speclib**, a shared library used by both the standalone `spec` CLI and the harness Planner. During creation speclib operates in bootstrap mode, writing the four artifacts sequentially and deferring cross-artifact validation until all four exist. See [services-architecture.md §7](services-architecture.md#7-the-spec-creation-tool) for the full spec creation tool description.
 
 A spec cannot move from `draft` to `active` while incomplete. See [spec-format_v1.2.md §3](../spec-format_v1.2.md#3-folder-layout-and-naming) for naming and completeness rules.
 
@@ -310,9 +310,9 @@ The harness recomputes and checks this hash whenever it loads the spec (on works
 
 ### 5.4 The write contract: author once, then freeze
 
-A spec is authored once and not changed after that. The spec is composed while in `draft` through speclib's session-based authoring model — either standalone via `af-spec` or through the harness Planner. The human reviews, and the `draft` to `active` transition freezes the package. From that point the declarative content is immutable. When the requirements turn out to be wrong, the response is a new spec that supersedes this one (§8.3), not an in-place edit.
+A spec is authored once and not changed after that. The spec is composed while in `draft` through speclib's session-based authoring model — either standalone via `spec` or through the harness Planner. The human reviews, and the `draft` to `active` transition freezes the package. From that point the declarative content is immutable. When the requirements turn out to be wrong, the response is a new spec that supersedes this one (§8.3), not an in-place edit.
 
-Authoring is a stateful session: the agent assesses the PRD, optionally refines it through structured Q&A iterations with the user, then generates the JSON artifacts. The session works against a local campaign directory, not the hub's spec store. Once the spec is complete, the user submits it to the hub via `af-spec submit`. The `draft` to `active` transition (`af spec approve`) is a hub operation — see [services-architecture.md §7.4](services-architecture.md#74-relationship-to-the-harness).
+Authoring is a stateful session: the agent assesses the PRD, optionally refines it through structured Q&A iterations with the user, then generates the JSON artifacts. The session works against a local campaign directory, not the hub's spec store. Once the spec is complete, the user submits it to the hub via `spec submit`. The `draft` to `active` transition (`af spec approve`) is a hub operation — see [services-architecture.md §7.4](services-architecture.md#74-relationship-to-the-harness).
 
 Within `draft`, writes are expressed as RFC 6902 JSON Patches validated against each artifact's schema.
 
@@ -334,7 +334,7 @@ The Spec Format Specification permits mutating an `active` spec; this harness de
 
 Agents do not read spec artifacts as files. The spec package lives in the spec store, outside the worktree, and agents access it through the harness API. This enforces the freeze structurally.
 
-**Access gate.** Only specs in `active` status or later (`sealed`, `superseded`) are served by the harness API. Draft specs are invisible to the harness — they exist only on the filesystem and are accessible only through speclib (via `af-spec` or the Planner). This ensures agents never see an unapproved, unfrozen spec.
+**Access gate.** Only specs in `active` status or later (`sealed`, `superseded`) are served by the harness API. Draft specs are invisible to the harness — they exist only on the filesystem and are accessible only through speclib (via `spec` or the Planner). This ensures agents never see an unapproved, unfrozen spec.
 
 The harness provides spec content through two channels:
 
@@ -352,7 +352,7 @@ The harness provides spec content through two channels:
 
   Full signature: `af_spec_read(what, artifact_name?, subtask_id?)`.
 
-There is no spec-write tool. The write path runs through speclib during authoring (via `af-spec` or the Planner).
+There is no spec-write tool. The write path runs through speclib during authoring (via `spec` or the Planner).
 
 ### 5.6 The task model
 
@@ -387,7 +387,7 @@ Traceability links every requirement through its test spec and task to an execut
 
 ### 5.7 Validation
 
-Validation is implemented in **speclib** and shared by the `af-spec` CLI, the harness Planner, and the harness itself. Two layers run on every authoring write while a spec is in `draft`:
+Validation is implemented in **speclib** and shared by the `spec` CLI, the harness Planner, and the harness itself. Two layers run on every authoring write while a spec is in `draft`:
 
 1. **Schema validation** — rejects malformed structure, unknown fields, missing fields, EARS mismatches, illegal transitions, invalid IDs. Sub-millisecond.
 2. **Cross-file integrity** — checks the four artifacts together: referential integrity of IDs, requirement-to-test coverage, glossary completeness, spec identity consistency, and traceability uniqueness.
@@ -396,7 +396,7 @@ A mutation that breaks integrity is rejected during drafting, so an inconsistent
 
 For the full list of validation rules, see [spec-format_v1.2.md §10](../spec-format_v1.2.md#10-validation).
 
-speclib eases the path to a clean commit with a **repair pass**: a required field with an inferable value, EARS field names that map cleanly to the declared pattern, or an ID one transform from valid are auto-corrected and logged. Hard rejection is reserved for semantic failures that need a human or agent decision. Repair suggestions are recorded in the activity log (when running through the harness) or to stderr (when running standalone via `af-spec`).
+speclib eases the path to a clean commit with a **repair pass**: a required field with an inferable value, EARS field names that map cleanly to the declared pattern, or an ID one transform from valid are auto-corrected and logged. Hard rejection is reserved for semantic failures that need a human or agent decision. Repair suggestions are recorded in the activity log (when running through the harness) or to stderr (when running standalone via `spec`).
 
 ### 5.8 Rendering
 
@@ -698,7 +698,7 @@ Every spec-driven task follows one flow. Spec authoring (phases 1-2) can happen 
 
 **Phase 0: Spec authoring.** Before the harness flow begins, the spec must exist and be approved (`active`). Two paths:
 
-- **Standalone path.** The Operator uses `af-spec` (or the agent skill) to author the spec in a local campaign directory, then submits it to the hub via `af-spec submit`. Authoring requires no hub; only submission and approval do. See [services-architecture.md §7](services-architecture.md#7-the-spec-creation-tool).
+- **Standalone path.** The Operator uses `spec` (or the agent skill) to author the spec in a local campaign directory, then submits it to the hub via `spec submit`. Authoring requires no hub; only submission and approval do. See [services-architecture.md §7](services-architecture.md#7-the-spec-creation-tool).
 - **Harness-mediated path.** The Operator creates a workspace, then starts a Planner run. The Planner uses speclib to draft the spec within the harness, grounded in attached Contexts. The Operator reviews and approves through the harness API.
 
 Both paths produce the same output: an `active`, frozen spec package on the filesystem under the campaign hierarchy.
@@ -737,7 +737,7 @@ Supersession is the modeled escape when the frozen plan is wrong.
 3. Commits partial work on the branch.
 4. Transitions the spec to `superseded`.
 
-The workspace stays `Active`. The Operator authors a corrective spec (via `af-spec` or the Planner), then creates a new workspace referencing it on the same branch, so partial commits carry forward.
+The workspace stays `Active`. The Operator authors a corrective spec (via `spec` or the Planner), then creates a new workspace referencing it on the same branch, so partial commits carry forward.
 
 ### 8.4 The Ralph flow
 
@@ -758,7 +758,7 @@ No spec is authored, frozen, or sealed. The deliverable is a branch.
 
 The harness persists state across three stores so a process restart resumes cleanly.
 
-- **Spec store.** Holds the spec artifacts (the four required files plus optional `architecture.md`), organized under campaigns on the filesystem: `<data_dir>/specs/<campaign-slug>/<spec-slug>/`. Source of truth for spec content. Written by speclib (via `af-spec` or the Planner); read by the harness at execution time.
+- **Spec store.** Holds the spec artifacts (the four required files plus optional `architecture.md`), organized under campaigns on the filesystem: `<data_dir>/specs/<campaign-slug>/<spec-slug>/`. Source of truth for spec content. Written by speclib (via `spec` or the Planner); read by the harness at execution time.
 - **Context store.** Holds Contexts and their sources above the workspace, keyed by Context id and revision.
 - **Operational store.** Holds everything else: workspace and campaign state, agent and run records, subtask execution state, conversation history, and the activity log.
 
@@ -840,7 +840,7 @@ The API is split by audience. **Operator-facing** operations are for the human c
 **Campaign.**
 
 - Create with goal document and optional shared Contexts.
-- Register a spec (submitted via `af-spec submit`).
+- Register a spec (submitted via `spec submit`).
 - Query status, dependency graph, blocked/unblocked workspaces.
 - Abandon.
 
@@ -848,11 +848,11 @@ The API is split by audience. **Operator-facing** operations are for the human c
 
 - Transition: `active` → `sealed`; supersede (§8.3).
 - Read `intent_hash` and lifecycle state.
-- Spec creation and the `draft` → `active` transition are handled by speclib, either through the standalone `af-spec` CLI or through the Planner specialist. The harness API does not accept writes to draft specs.
+- Spec creation and the `draft` → `active` transition are handled by speclib, either through the standalone `spec` CLI or through the Planner specialist. The harness API does not accept writes to draft specs.
 
 **Spec authoring (harness-mediated path).**
 
-- Start a Planner run: the Planner uses speclib to draft artifacts within the harness. The Operator reviews and approves through the harness API. This is the harness-mediated alternative to using `af-spec` standalone.
+- Start a Planner run: the Planner uses speclib to draft artifacts within the harness. The Operator reviews and approves through the harness API. This is the harness-mediated alternative to using `spec` standalone.
 
 **Spec read and render.**
 
@@ -935,7 +935,7 @@ A Context's pinned revision is immutable for the duration of a run, so re-runnin
 
 This document specifies the coordination layer. Three companion components complete the system:
 
-- **[Spec Creation Tool](services-architecture.md#7-the-spec-creation-tool)** — speclib (shared library), the `af-spec` CLI, and the agent skill. Handles spec authoring independently of the harness. Writes to the spec store filesystem. The harness Planner uses speclib for the harness-mediated authoring path.
+- **[Spec Creation Tool](services-architecture.md#7-the-spec-creation-tool)** — speclib (shared library), the `spec` CLI, and the agent skill. Handles spec authoring independently of the harness. Writes to the spec store filesystem. The harness Planner uses speclib for the harness-mediated authoring path.
 
 - **[Runtime Layer](runtime-layer.md)** — container isolation, worktree management, harness adapters per provider, agent lifecycle (phase and activity), templates, sidecar services, and the af MCP bridge. The coordination layer drives the runtime through a narrow interface and never reaches past it.
 
@@ -974,8 +974,8 @@ The af MCP bridge is the integration point between the two layers: it runs as a 
 | Pinned revision | The Context revision a workspace is fixed to for its runs. |
 | Ralph | Autonomous loop specialist outside the spec package. Goal + verifier + circuit breakers. |
 | Planner | Harness specialist that drafts JSON artifacts from PRD input during `draft`, using speclib. The harness-mediated path for spec authoring. |
-| speclib | The shared library for spec creation, validation, and rendering. Used by `af-spec`, the Planner, and the harness. See [services-architecture.md §7](services-architecture.md#7-the-spec-creation-tool). |
-| af-spec | Standalone CLI for spec authoring. Wraps speclib. Works without the hub. See [services-architecture.md §7](services-architecture.md#7-the-spec-creation-tool). |
+| speclib | The shared library for spec creation, validation, and rendering. Used by `spec`, the Planner, and the harness. See [services-architecture.md §7](services-architecture.md#7-the-spec-creation-tool). |
+| spec | Standalone CLI for spec authoring. Wraps speclib. Works without the hub. See [services-architecture.md §7](services-architecture.md#7-the-spec-creation-tool). |
 | Coordinator | Agent that drives execution after spec approval: delegates, monitors, triggers verification. |
 | Archetype | Agent that executes a subtask and transitions only its own subtask's state. |
 | Awaiting verification | Subtask state set by an Implementor on completion; harness moves to `done` or `pending_reevaluation`. |

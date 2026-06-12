@@ -12,7 +12,7 @@ and a skill on top.
 
 ```mermaid
 graph TD
-    CLI["af-spec CLI (spec 04)"] --> SL["speclib"]
+    CLI["spec CLI (spec 04)"] --> SL["speclib"]
     SKILL["Spec Skill (spec 05)"] --> SL
     SL --> CONFIG["speclib.config"]
     SL --> AUTH["speclib.auth"]

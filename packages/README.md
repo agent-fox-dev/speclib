@@ -1,6 +1,6 @@
-# speclib
+# af-core
 
-AI-powered spec creation tool for standalone authoring of spec packages.
+Core packages for the agent-fox agentic development harness.
 
 ## Repository Structure
 

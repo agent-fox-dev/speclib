@@ -159,7 +159,7 @@ locations, import paths, and configuration files.
     - [x] `packages/spec-cli/spec_cli/cli.py` exists
     - [x] `packages/spec-cli/spec_cli/ui.py` exists
     - [x] `packages/spec-cli/spec_cli/skill/__init__.py` exists
-    - [x] `packages/spec-cli/spec_cli/skill/af-spec.md` exists
+    - [x] `packages/spec-cli/spec_cli/skill/spec.md` exists
     - [x] Spec tests TS-10-6, TS-10-8 pass
     - [x] No linter warnings: `uv run ruff check packages/spec-cli/`
 
@@ -175,7 +175,7 @@ locations, import paths, and configuration files.
     - _Requirements: 10-REQ-6.3, 10-REQ-6.4_
 
   - [x] 5.2 Update CLI group help text
-    - Update CLI group help text from "af-spec" to "spec"
+    - Verify CLI group help text displays "spec"
     - _Requirements: 10-REQ-2.E1_
 
   - [x] 5.V Verify task group 5

@@ -1,8 +1,8 @@
-# Design Document: af-spec CLI
+# Design Document: spec CLI
 
 ## Overview
 
-This spec implements the `af-spec` command-line interface using Click. The CLI
+This spec implements the `spec` command-line interface using Click. The CLI
 is a thin presentation layer that delegates all business logic to speclib's
 Campaign (spec 02), SpecSession (spec 02), and agent pipeline (spec 03).
 The CLI is responsible for argument parsing, campaign/spec resolution, output
@@ -175,7 +175,7 @@ graph TD
               default=None, help="Campaign directory (default: CWD)")
 @click.pass_context
 def main(ctx: click.Context, campaign_dir: str | None) -> None:
-    """af-spec: local spec authoring tool."""
+    """spec: local spec authoring tool."""
     ctx.ensure_object(dict)
     ctx.obj["campaign_dir"] = Path(campaign_dir) if campaign_dir else Path.cwd()
 ```
@@ -393,7 +393,7 @@ SHALL use CWD.
 
 ### Property 4: Init command idempotency guard
 
-*For any* path that already contains a `campaign.yaml`, `af-spec init` SHALL
+*For any* path that already contains a `campaign.yaml`, `spec init` SHALL
 fail with exit code 1. It SHALL never overwrite or modify an existing campaign.
 
 **Validates: Requirements 04-REQ-1.4 (via Campaign.create raising CampaignError)**

@@ -12,7 +12,7 @@ requirements; property tests verify config precedence invariants.
 
 **Requirement:** 01-REQ-1.1
 **Type:** integration
-**Description:** Verify that `uv pip install .` succeeds and produces the `af-spec` CLI entry point.
+**Description:** Verify that `uv pip install .` succeeds and produces the `spec` CLI entry point.
 
 **Preconditions:**
 - uv is installed
@@ -23,13 +23,13 @@ requirements; property tests verify config precedence invariants.
 
 **Expected:**
 - Exit code 0
-- `af-spec --help` produces usage output
+- `spec --help` produces usage output
 
 **Assertion pseudocode:**
 ```
 result = shell("uv pip install .")
 ASSERT result.exit_code == 0
-result2 = shell("af-spec --help")
+result2 = shell("spec --help")
 ASSERT result2.exit_code == 0
 ASSERT "Usage" in result2.stdout
 ```

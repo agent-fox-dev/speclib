@@ -201,12 +201,12 @@ CLI package.
 
 **Expected:**
 - `packages/spec-cli/spec_cli/skill/__init__.py` exists.
-- `packages/spec-cli/spec_cli/skill/af-spec.md` exists.
+- `packages/spec-cli/spec_cli/skill/spec.md` exists.
 
 **Assertion pseudocode:**
 ```
 ASSERT (repo_root / "packages/spec-cli/spec_cli/skill/__init__.py").exists()
-ASSERT (repo_root / "packages/spec-cli/spec_cli/skill/af-spec.md").exists()
+ASSERT (repo_root / "packages/spec-cli/spec_cli/skill/spec.md").exists()
 ```
 
 ### TS-10-9: Root pyproject.toml Has No Scripts
@@ -434,12 +434,12 @@ FOR EACH package IN ["afspec", "speclib", "spec-cli"]:
 **Property:** Property 3 from design.md
 **Validates:** 10-REQ-6.5, 10-REQ-2.4
 **Type:** property
-**Description:** The spec CLI produces the same output as af-spec for
-all subcommands.
+**Description:** The spec CLI produces the same output as the
+pre-restructure CLI for all subcommands.
 
 **For any:** subcommand S in the CLI command set
-**Invariant:** `spec S --help` produces the same help text as the old
-`af-spec S --help` (modulo program name).
+**Invariant:** `spec S --help` produces the same help text as the
+pre-restructure CLI (modulo program name).
 
 **Assertion pseudocode:**
 ```
@@ -552,7 +552,6 @@ ASSERT speclib.SpecSession is not None
 
 **Expected:**
 - Output contains "spec" as the program name.
-- Output does not contain "af-spec".
 
 **Assertion pseudocode:**
 ```
@@ -560,7 +559,7 @@ from click.testing import CliRunner
 from spec_cli.cli import main
 runner = CliRunner()
 result = runner.invoke(main, ["--help"])
-ASSERT "af-spec" not in result.output
+ASSERT "spec" in result.output
 ```
 
 ### TS-10-E3: Relative Imports Within speclib Still Work

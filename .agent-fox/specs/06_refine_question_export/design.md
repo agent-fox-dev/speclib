@@ -2,7 +2,7 @@
 
 ## Overview
 
-Adds a question-export mode to the `af-spec refine` CLI command. When
+Adds a question-export mode to the `spec refine` CLI command. When
 `--answers` is omitted, the command reads the session's latest assessment
 and outputs structured JSON containing question details and an answer template.
 A new `pending_questions()` method on `SpecSession` provides the underlying
@@ -12,7 +12,7 @@ data extraction.
 
 ```mermaid
 flowchart TD
-    A[af-spec refine spec] --> B{--answers provided?}
+    A[spec refine spec] --> B{--answers provided?}
     B -->|Yes| C[Existing flow: submit answers]
     B -->|No| D[session.pending_questions]
     D --> E[Build JSON: questions + answers template]

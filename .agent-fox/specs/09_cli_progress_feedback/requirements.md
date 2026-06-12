@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Adds animated spinner feedback to the `af-spec` CLI's long-running commands
+Adds animated spinner feedback to the `spec` CLI's long-running commands
 and a global `--quiet` flag for scripted use.
 
 ## Glossary
@@ -20,7 +20,7 @@ and a global `--quiet` flag for scripted use.
 
 ### Requirement 1: Spinner During Long-Running Commands
 
-**User Story:** As a user running `af-spec` interactively, I want to see a
+**User Story:** As a user running `spec` interactively, I want to see a
 spinner with a status message during long operations, so that I know the
 tool is working.
 
@@ -58,7 +58,7 @@ tool is working.
 
 ### Requirement 2: Stderr Output
 
-**User Story:** As an agent piping `af-spec` output, I want spinner output
+**User Story:** As an agent piping `spec` output, I want spinner output
 on stderr only, so that stdout remains clean for JSON parsing.
 
 #### Acceptance Criteria
@@ -76,7 +76,7 @@ spinner and status output, so that only results and errors appear.
 
 #### Acceptance Criteria
 
-1. [09-REQ-3.1] THE `af-spec` CLI group SHALL accept a `--quiet` / `-q`
+1. [09-REQ-3.1] THE `spec` CLI group SHALL accept a `--quiet` / `-q`
    global option.
 
 2. [09-REQ-3.2] WHEN `--quiet` is set, THE CLI SHALL suppress all spinner

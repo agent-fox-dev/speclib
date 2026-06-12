@@ -63,7 +63,7 @@ Groups are ordered so the scaffold exists before tests can import anything.
     - Dependencies: afspec, anthropic[vertex,bedrock], click, pyyaml
     - Dev dependencies: pytest, hypothesis, ruff, mypy
     - Build backend: hatchling
-    - CLI entry point: af-spec = speclib.cli:main
+    - CLI entry point: spec = speclib.cli:main
     - Ruff and mypy configuration
     - _Requirements: 01-REQ-1.1, 01-REQ-1.2, 01-REQ-1.3, 01-REQ-1.4_
 
@@ -83,7 +83,7 @@ Groups are ordered so the scaffold exists before tests can import anything.
 
   - [x] 2.4 Run uv sync to install dependencies
     - Verify `uv sync` succeeds
-    - Verify `uv run af-spec --help` works
+    - Verify `uv run spec --help` works
     - _Requirements: 01-REQ-1.1_
 
   - [x] 2.V Verify task group 2
@@ -200,5 +200,5 @@ Groups are ordered so the scaffold exists before tests can import anything.
   `AnthropicVertex` constructors to avoid real API calls.
 - Config tests use `tmp_path` fixtures with patched `Path.home()` to isolate
   settings file access.
-- The CLI entry point (`af-spec`) is a minimal stub in this spec — spec 04
+- The CLI entry point (`spec`) is a minimal stub in this spec — spec 04
   implements the full command set.

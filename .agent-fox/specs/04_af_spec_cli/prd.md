@@ -1,7 +1,7 @@
 ---
 spec_id: "04"
 spec_name: "af_spec_cli"
-title: "af-spec CLI — Local Spec Authoring Commands"
+title: "spec CLI — Local Spec Authoring Commands"
 status: "draft"
 created_at: "2026-06-09T12:00:00Z"
 updated_at: "2026-06-09T12:00:00Z"
@@ -13,11 +13,11 @@ intent_hash: null
 schema_version: 1
 ---
 
-# af-spec CLI — Local Spec Authoring Commands
+# spec CLI — Local Spec Authoring Commands
 
 ## Intent
 
-Implement the `af-spec` command-line interface using the Click framework,
+Implement the `spec` command-line interface using the Click framework,
 providing local-only campaign management and spec authoring commands that wrap
 the speclib library. This is the primary user-facing interface for creating,
 assessing, refining, and generating specs without requiring network access or
@@ -25,7 +25,7 @@ hub interaction.
 
 ## Goals
 
-1. Provide a Click-based CLI entry point (`af-spec`) with a top-level command
+1. Provide a Click-based CLI entry point (`spec`) with a top-level command
    group and subcommands for all local spec authoring operations.
 2. Implement campaign management commands (`init`, `list`) for creating and
    inspecting campaign working directories.
@@ -51,8 +51,8 @@ hub interaction.
 
 ## Background
 
-The `af-spec` CLI is the primary user interface for the speclib project. It is
-defined in `pyproject.toml` as `af-spec = speclib.cli:main` and is installed
+The `spec` CLI is the primary user interface for the speclib project. It is
+defined in `pyproject.toml` as `spec = speclib.cli:main` and is installed
 as a console script when the package is installed via `uv`.
 
 The CLI wraps the speclib library, specifically the `Campaign` class (spec 02)

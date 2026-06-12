@@ -168,9 +168,9 @@ def test_ts10_8_skill_init_exists() -> None:
 
 
 def test_ts10_8_skill_markdown_exists() -> None:
-    """TS-10-8: skill/af-spec.md exists in spec_cli package."""
-    path = SPEC_CLI_PKG / "spec_cli" / "skill" / "af-spec.md"
-    assert path.exists(), f"skill/af-spec.md not found at {path}"
+    """TS-10-8: skill/spec.md exists in spec_cli package."""
+    path = SPEC_CLI_PKG / "spec_cli" / "skill" / "spec.md"
+    assert path.exists(), f"skill/spec.md not found at {path}"
 
 
 # ---------------------------------------------------------------------------

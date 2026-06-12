@@ -2,13 +2,13 @@
 
 ## Intent
 
-Persist the answers provided via `af-spec refine --answers` into
+Persist the answers provided via `spec refine --answers` into
 `_session.json` so that the full assess-refine-accept interaction
 history is recorded and auditable.
 
 ## Background
 
-The `af-spec` tool implements an iterative refinement loop:
+The `spec` tool implements an iterative refinement loop:
 
 1. `assess` — agent evaluates the PRD, produces questions.
 2. `refine --answers` — user provides answers, agent updates PRD and

@@ -7,8 +7,7 @@ monorepo hosting multiple independent Python packages under `packages/`.
 The goal is to separate the reusable library code (agents, sessions,
 campaigns, config, auth) from the CLI entry point, so that the library
 can be consumed programmatically from any Python code — not just through
-the `af-spec` CLI. At the same time, rename the CLI from `af-spec` to
-`spec` and establish a pattern for adding future CLI tools as separate
+the `spec` CLI, and establish a pattern for adding future CLI tools as separate
 installable packages.
 
 ## Goals
@@ -53,7 +52,7 @@ speclib/          # Library + CLI combined
   errors.py       # Exception hierarchy
   prompts.py      # Prompt templates
   session.py      # Session state machine
-  skill/          # af-spec.md skill file + install logic
+  skill/          # spec.md skill file + install logic
   tools.py        # Tool definitions for structured output
   ui.py           # StatusSpinner (Rich-based)
 tests/            # All tests in one directory
@@ -61,7 +60,7 @@ packages/afspec/  # Already separated spec-format library
 ```
 
 The `pyproject.toml` at the root defines both the library and the CLI
-entry point (`af-spec = "speclib.cli:main"`). The library modules
+entry point (`spec = "speclib.cli:main"`). The library modules
 (`agent`, `session`, `campaign`, `config`, `auth`, `prompts`, `tools`,
 `errors`) have no dependency on Click or Rich and can be cleanly
 separated from the CLI modules (`cli`, `ui`, `skill/`).
@@ -82,7 +81,7 @@ separated from the CLI modules (`cli`, `ui`, `skill/`).
    `packages/spec-cli/tests/`. Each package's `pyproject.toml` defines
    its own test paths.
 
-4. **Skill files go with the CLI.** The `af-spec.md` skill prompt and
+4. **Skill files go with the CLI.** The `spec.md` skill prompt and
    the `install-skill` command are CLI concerns and live under
    `packages/spec-cli/`.
 
@@ -124,7 +123,7 @@ packages/
       ui.py
       skill/
         __init__.py
-        af-spec.md
+        spec.md
     pyproject.toml
     tests/
 pyproject.toml      # Workspace root (not installable)

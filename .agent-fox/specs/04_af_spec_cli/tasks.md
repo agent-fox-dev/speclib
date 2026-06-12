@@ -1,4 +1,4 @@
-# Implementation Plan: af-spec CLI
+# Implementation Plan: spec CLI
 
 <!-- AGENT INSTRUCTIONS
 - Implement exactly ONE top-level task group per session
@@ -10,7 +10,7 @@
 
 ## Overview
 
-This plan implements the af-spec CLI using Click. The CLI is a thin
+This plan implements the spec CLI using Click. The CLI is a thin
 presentation layer wrapping speclib's Campaign, SpecSession, and agent
 pipeline. Groups are ordered: tests first, then shared infrastructure
 (helpers, error handling), then commands in logical clusters, and finally
@@ -304,7 +304,7 @@ wiring verification.
     - _Requirements: all_
 
   - [x] 7.2 Verify Click decorators and help text
-    - `af-spec --help` lists all subcommands
+    - `spec --help` lists all subcommands
     - Each subcommand has `--help` producing correct usage
     - `--campaign-dir` appears in group help
     - _Requirements: all_
@@ -327,7 +327,7 @@ wiring verification.
 
   - [x] 7.6 Cross-spec entry point verification
     - Verify spec 01 stub `speclib/cli.py:main` is fully replaced
-    - Verify `af-spec --help` works after `uv sync`
+    - Verify `spec --help` works after `uv sync`
     - Verify all 11 subcommands appear in help output
     - _Requirements: all_
 

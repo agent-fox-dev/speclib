@@ -2,14 +2,14 @@
 
 ## Intent
 
-Allow the `af-spec refine` command to be used without `--answers` to output the
+Allow the `spec refine` command to be used without `--answers` to output the
 pending assessment questions as structured JSON to stdout, giving users and
 agents a convenient way to inspect questions and create the expected answer JSON
 object.
 
 ## Background
 
-After running `af-spec assess`, the session's `_session.json` stores a list of
+After running `spec assess`, the session's `_session.json` stores a list of
 questions that must be answered before the spec can be completed. Currently, to
 create the answers file a user must manually read `_session.json`, find the
 questions array, and construct a `{"q1": "...", "q2": "..."}` JSON object. This
@@ -17,7 +17,7 @@ is error-prone and inconvenient, especially for automation agents.
 
 ## Requirements
 
-1. When `af-spec refine <spec>` is invoked **without** the `--answers` option,
+1. When `spec refine <spec>` is invoked **without** the `--answers` option,
    the CLI SHALL output JSON to stdout containing all questions from the latest
    assessment in the session, along with a pre-filled answer template.
 
@@ -29,7 +29,7 @@ is error-prone and inconvenient, especially for automation agents.
    each question ID to an empty string, which the user can fill in and pass
    back via `--answers`.
 
-4. When `af-spec refine <spec> --answers <file>` is invoked (existing
+4. When `spec refine <spec> --answers <file>` is invoked (existing
    behavior), the CLI SHALL continue to work exactly as before.
 
 5. When there is no assessment in the session (no questions to export), the

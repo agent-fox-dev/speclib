@@ -710,7 +710,7 @@ def install_skill(target: str | None) -> None:
         # Resolve destination path.
         home = Path.home()
         skill_dir = home / AGENT_TARGETS[target]
-        dest = skill_dir / "af-spec.md"
+        dest = skill_dir / "spec.md"
 
         # Create skill directory if needed.
         skill_dir.mkdir(parents=True, exist_ok=True)
@@ -723,7 +723,7 @@ def install_skill(target: str | None) -> None:
 
         # Report success.
         action = "Updated" if is_update else "Installed"
-        click.echo(f"{action} af-spec skill to {dest}")
+        click.echo(f"{action} spec skill to {dest}")
     except SpeclibError as exc:
         click.echo(f"Error: {exc}", err=True)
         sys.exit(1)

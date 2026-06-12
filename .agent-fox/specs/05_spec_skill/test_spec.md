@@ -45,13 +45,13 @@ ASSERT SKILL_FILE_PATH.stat().st_size > 0
 - Read skill file content
 
 **Expected:**
-- Contains a top-level heading with "af-spec"
+- Contains a top-level heading with "spec"
 - Contains a "Trigger" section or subsection
 
 **Assertion pseudocode:**
 ```
 content = SKILL_FILE_PATH.read_text()
-ASSERT "# af-spec" in content or "# Af-Spec" in content
+ASSERT "# spec" in content or "# Af-Spec" in content
 ASSERT "trigger" in content.lower()
 ```
 
@@ -59,7 +59,7 @@ ASSERT "trigger" in content.lower()
 
 **Requirement:** 05-REQ-1.3
 **Type:** unit
-**Description:** Verify the skill file mentions all required af-spec CLI commands.
+**Description:** Verify the skill file mentions all required spec CLI commands.
 
 **Preconditions:**
 - Skill file exists
@@ -73,9 +73,9 @@ ASSERT "trigger" in content.lower()
 **Assertion pseudocode:**
 ```
 content = SKILL_FILE_PATH.read_text()
-for cmd in ["af-spec init", "af-spec new", "af-spec assess", "af-spec refine",
-            "af-spec accept", "af-spec generate", "af-spec status",
-            "af-spec validate", "af-spec render"]:
+for cmd in ["spec init", "spec new", "spec assess", "spec refine",
+            "spec accept", "spec generate", "spec status",
+            "spec validate", "spec render"]:
     ASSERT cmd in content
 ```
 
@@ -89,7 +89,7 @@ for cmd in ["af-spec init", "af-spec new", "af-spec assess", "af-spec refine",
 - Skill file exists
 
 **Input:**
-- Read skill file content, search for code blocks containing af-spec commands
+- Read skill file content, search for code blocks containing spec commands
 
 **Expected:**
 - At least one code block example per required command
@@ -100,7 +100,7 @@ content = SKILL_FILE_PATH.read_text()
 code_blocks = extract_fenced_code_blocks(content)
 for cmd in ["init", "new", "assess", "refine", "accept", "generate",
             "status", "validate", "render"]:
-    ASSERT any(f"af-spec {cmd}" in block for block in code_blocks)
+    ASSERT any(f"spec {cmd}" in block for block in code_blocks)
 ```
 
 ### TS-05-5: Skill file is valid markdown
@@ -339,11 +339,11 @@ with patched_home(tmp_path):
 - Temp home directory with `~/.claude/` present
 
 **Input:**
-- Run `af-spec install-skill` with Click test runner and patched home
+- Run `spec install-skill` with Click test runner and patched home
 
 **Expected:**
 - Exit code 0
-- `~/.claude/skills/af-spec.md` exists and matches source content
+- `~/.claude/skills/spec.md` exists and matches source content
 
 **Assertion pseudocode:**
 ```
@@ -351,7 +351,7 @@ with patched_home(tmp_path):
     (tmp_path / ".claude").mkdir()
     result = cli_runner.invoke(cli, ["install-skill"])
     ASSERT result.exit_code == 0
-    installed = tmp_path / ".claude" / "skills" / "af-spec.md"
+    installed = tmp_path / ".claude" / "skills" / "spec.md"
     ASSERT installed.exists()
     ASSERT installed.read_text() == SKILL_FILE_PATH.read_text()
 ```
@@ -366,18 +366,18 @@ with patched_home(tmp_path):
 - Temp home directory (no agent CLI directories needed)
 
 **Input:**
-- Run `af-spec install-skill --target claude` with Click test runner
+- Run `spec install-skill --target claude` with Click test runner
 
 **Expected:**
 - Exit code 0
-- `~/.claude/skills/af-spec.md` created
+- `~/.claude/skills/spec.md` created
 
 **Assertion pseudocode:**
 ```
 with patched_home(tmp_path):
     result = cli_runner.invoke(cli, ["install-skill", "--target", "claude"])
     ASSERT result.exit_code == 0
-    ASSERT (tmp_path / ".claude" / "skills" / "af-spec.md").exists()
+    ASSERT (tmp_path / ".claude" / "skills" / "spec.md").exists()
 ```
 
 ### TS-05-17: install-skill overwrites existing file
@@ -387,10 +387,10 @@ with patched_home(tmp_path):
 **Description:** Verify install-skill overwrites an existing skill file.
 
 **Preconditions:**
-- Temp home directory with existing `~/.claude/skills/af-spec.md` containing "old content"
+- Temp home directory with existing `~/.claude/skills/spec.md` containing "old content"
 
 **Input:**
-- Run `af-spec install-skill --target claude`
+- Run `spec install-skill --target claude`
 
 **Expected:**
 - Exit code 0
@@ -402,10 +402,10 @@ with patched_home(tmp_path):
 with patched_home(tmp_path):
     skill_dir = tmp_path / ".claude" / "skills"
     skill_dir.mkdir(parents=True)
-    (skill_dir / "af-spec.md").write_text("old content")
+    (skill_dir / "spec.md").write_text("old content")
     result = cli_runner.invoke(cli, ["install-skill", "--target", "claude"])
     ASSERT result.exit_code == 0
-    ASSERT (skill_dir / "af-spec.md").read_text() == SKILL_FILE_PATH.read_text()
+    ASSERT (skill_dir / "spec.md").read_text() == SKILL_FILE_PATH.read_text()
     ASSERT "updated" in result.output.lower() or "installed" in result.output.lower()
 ```
 
@@ -419,7 +419,7 @@ with patched_home(tmp_path):
 - Temp home directory
 
 **Input:**
-- Run `af-spec install-skill --target claude`
+- Run `spec install-skill --target claude`
 
 **Expected:**
 - Output contains the installed file path
@@ -429,7 +429,7 @@ with patched_home(tmp_path):
 with patched_home(tmp_path):
     result = cli_runner.invoke(cli, ["install-skill", "--target", "claude"])
     ASSERT result.exit_code == 0
-    ASSERT ".claude/skills/af-spec.md" in result.output
+    ASSERT ".claude/skills/spec.md" in result.output
 ```
 
 ### TS-05-19: Error handling section in skill file
@@ -487,12 +487,12 @@ ASSERT "exit code" in content or "exit status" in content or "failed" in content
 - Read skill file content
 
 **Expected:**
-- Contains instructions about using `af-spec status` to check state
+- Contains instructions about using `spec status` to check state
 
 **Assertion pseudocode:**
 ```
 content = SKILL_FILE_PATH.read_text()
-ASSERT "af-spec status" in content
+ASSERT "spec status" in content
 ASSERT "state" in content.lower() or "status" in content.lower()
 ```
 
@@ -508,7 +508,7 @@ ASSERT "state" in content.lower() or "status" in content.lower()
 - Temp home directory with no agent CLI directories
 
 **Input:**
-- Run `af-spec install-skill` with Click test runner
+- Run `spec install-skill` with Click test runner
 
 **Expected:**
 - Non-zero exit code
@@ -533,7 +533,7 @@ with patched_home(tmp_path):
 - Temp home directory with `~/.claude/` but no `~/.claude/skills/`
 
 **Input:**
-- Run `af-spec install-skill --target claude`
+- Run `spec install-skill --target claude`
 
 **Expected:**
 - `~/.claude/skills/` directory created
@@ -546,7 +546,7 @@ with patched_home(tmp_path):
     result = cli_runner.invoke(cli, ["install-skill", "--target", "claude"])
     ASSERT result.exit_code == 0
     ASSERT (tmp_path / ".claude" / "skills").is_dir()
-    ASSERT (tmp_path / ".claude" / "skills" / "af-spec.md").exists()
+    ASSERT (tmp_path / ".claude" / "skills" / "spec.md").exists()
 ```
 
 ### TS-05-E3: Missing source file raises SpeclibError
@@ -559,14 +559,14 @@ with patched_home(tmp_path):
 - SKILL_FILE_PATH patched to a non-existent path
 
 **Input:**
-- Run `af-spec install-skill --target claude`
+- Run `spec install-skill --target claude`
 
 **Expected:**
 - SpeclibError raised (or non-zero exit with error message)
 
 **Assertion pseudocode:**
 ```
-with patched_skill_path(Path("/nonexistent/af-spec.md")):
+with patched_skill_path(Path("/nonexistent/spec.md")):
     result = cli_runner.invoke(cli, ["install-skill", "--target", "claude"])
     ASSERT result.exit_code != 0
     ASSERT "missing" in result.output.lower() or "not found" in result.output.lower()
@@ -615,7 +615,7 @@ ASSERT "interactive" in content
 ASSERT "fail" in content or "error" in content
 ```
 
-### TS-05-E6: af-spec not on PATH
+### TS-05-E6: spec not on PATH
 
 **Requirement:** 05-REQ-6.E1
 **Type:** unit
@@ -628,7 +628,7 @@ ASSERT "fail" in content or "error" in content
 - Read skill file content
 
 **Expected:**
-- Contains instructions about installing speclib when af-spec is not found
+- Contains instructions about installing speclib when spec is not found
 
 **Assertion pseudocode:**
 ```
@@ -736,7 +736,7 @@ FOR ANY target IN ["claude", "gemini"]:
     with patched_home(tmp_path):
         cli_runner.invoke(cli, ["install-skill", "--target", target])
         target_dirs = {"claude": ".claude/skills", "gemini": ".gemini/skills"}
-        installed = tmp_path / target_dirs[target] / "af-spec.md"
+        installed = tmp_path / target_dirs[target] / "spec.md"
         ASSERT installed.read_bytes() == SKILL_FILE_PATH.read_bytes()
 ```
 
@@ -748,7 +748,7 @@ FOR ANY target IN ["claude", "gemini"]:
 **Description:** Every required CLI command appears in the skill file.
 
 **For any:** command in {init, new, assess, refine, accept, generate, status, validate, render}
-**Invariant:** `af-spec {command}` appears in the skill file content
+**Invariant:** `spec {command}` appears in the skill file content
 
 **Assertion pseudocode:**
 ```
@@ -756,7 +756,7 @@ content = SKILL_FILE_PATH.read_text()
 required_commands = ["init", "new", "assess", "refine", "accept",
                      "generate", "status", "validate", "render"]
 FOR ANY cmd IN required_commands:
-    ASSERT f"af-spec {cmd}" in content
+    ASSERT f"spec {cmd}" in content
 ```
 
 ## Integration Smoke Tests
@@ -768,10 +768,10 @@ FOR ANY cmd IN required_commands:
 
 **Setup:** Temp home directory with `~/.claude/` present.
 
-**Trigger:** Run `af-spec install-skill`.
+**Trigger:** Run `spec install-skill`.
 
 **Expected side effects:**
-- `~/.claude/skills/af-spec.md` exists with content matching source
+- `~/.claude/skills/spec.md` exists with content matching source
 - Success message printed with file path
 
 **Must NOT satisfy with:** Mocking the copy operation.
@@ -782,10 +782,10 @@ with patched_home(tmp_path):
     (tmp_path / ".claude").mkdir()
     result = cli_runner.invoke(cli, ["install-skill"])
     ASSERT result.exit_code == 0
-    installed = tmp_path / ".claude" / "skills" / "af-spec.md"
+    installed = tmp_path / ".claude" / "skills" / "spec.md"
     ASSERT installed.exists()
     ASSERT installed.read_bytes() == SKILL_FILE_PATH.read_bytes()
-    ASSERT str(installed) in result.output or ".claude/skills/af-spec.md" in result.output
+    ASSERT str(installed) in result.output or ".claude/skills/spec.md" in result.output
 ```
 
 ## Coverage Matrix

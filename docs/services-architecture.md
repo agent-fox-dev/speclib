@@ -43,7 +43,7 @@ layer (containers, worktrees, adapters, agent lifecycle) is specified in
 The hub is the coordination service. It owns:
 
 - **Spec store.** Reads spec artifacts from the filesystem (written by
-  speclib via `af-spec` or the Planner). Serves reads to the MCP bridge
+  speclib via `spec` or the Planner). Serves reads to the MCP bridge
   and the CLI. Enforces the access gate: only `active` or later specs are
   served.
 - **Context store.** Persists Context metadata, source descriptors,
@@ -193,14 +193,14 @@ af hub status
 ```
 
 Spec authoring commands (`init`, `draft`, `generate`, `approve`) are in the
-standalone `af-spec` CLI (§7), not here. The `af` CLI operates on approved
+standalone `spec` CLI (§7), not here. The `af` CLI operates on approved
 specs for lifecycle transitions, reads, and validation.
 
 ### 3.3 Spec authoring
 
 Two paths to create a spec:
 
-- **Standalone path.** The Operator uses the `af-spec` CLI (§7) or the
+- **Standalone path.** The Operator uses the `spec` CLI (§7) or the
   agent skill to author and approve a spec. No hub required. This is the
   primary authoring workflow.
 - **Harness-mediated path.** The Operator starts a Planner run via
@@ -323,7 +323,7 @@ The spec creation tool is a standalone component for authoring spec packages.
 It is implemented in Python, built on the
 [Claude Agent SDK](https://docs.anthropic.com/en/docs/agents-and-tools/agent-sdk),
 and works independently of the harness — no hub required for authoring. It
-consists of three parts: a shared library (speclib), a CLI (`af-spec`), and
+consists of three parts: a shared library (speclib), a CLI (`spec`), and
 an agent skill.
 
 Spec creation is a **stateful, session-based process**. A session starts
@@ -331,7 +331,7 @@ with an existing PRD (rough draft or fully fleshed out), uses an agent to
 assess and optionally refine it, then generates the remaining artifacts.
 The session works against a **local campaign directory**, not the hub's
 spec store. Once a spec is complete, the user pushes it to the hub via
-`af-spec submit`.
+`spec submit`.
 
 ### 7.1 speclib
 
@@ -339,7 +339,7 @@ The core Python library. Implements the
 [Spec Format Specification](../spec-format_v1.2.md) and drives spec
 authoring through the Claude Agent SDK. speclib is used by:
 
-- the `af-spec` CLI (standalone authoring),
+- the `spec` CLI (standalone authoring),
 - the Planner specialist inside the harness (harness-mediated authoring),
 - the harness itself (validation, rendering, and prompt assembly at
   execution time — these do not require the Agent SDK).
@@ -509,8 +509,8 @@ subdirectories and a `campaign.yaml`:
     ...
 ```
 
-`af-spec init` creates the campaign directory and `campaign.yaml`.
-`af-spec new` creates a spec subdirectory within it. Multiple specs can
+`spec init` creates the campaign directory and `campaign.yaml`.
+`spec new` creates a spec subdirectory within it. Multiple specs can
 be authored in parallel within the same campaign directory. Each spec
 has its own session.
 
@@ -567,64 +567,64 @@ in Python:
   `draft → active` transition (Intent hashing, freeze) is performed by
   the hub, not by speclib standalone (see §7.4).
 
-### 7.2 af-spec CLI
+### 7.2 spec CLI
 
 A separate Python binary wrapping speclib. Does not require the hub to be
 running — except for `submit` (push a spec to the hub) and `import` (pull
 from the hub). The `draft → active` transition (`approve`) is a hub
-operation invoked through the `af` CLI, not `af-spec` (see §7.4).
+operation invoked through the `af` CLI, not `spec` (see §7.4).
 
 **Campaign commands:**
 
 ```
-af-spec init <path> --name <name> --description <text>
+spec init <path> --name <name> --description <text>
     Create a new campaign working directory at <path> with campaign.yaml.
     If <path> exists and is empty, initialize it in place.
 
-af-spec import --hub <url> <campaign-slug> [--target <path>]
+spec import --hub <url> <campaign-slug> [--target <path>]
     Pull an existing campaign (campaign.yaml + all specs) from the hub's
     spec store into a local working directory. Useful for context when
     authoring a new spec that depends on existing ones.
 
-af-spec list [<campaign-dir>]
+spec list [<campaign-dir>]
     List specs in a campaign directory with their session state.
 ```
 
 **Spec authoring commands** (run from within a campaign directory):
 
 ```
-af-spec new <prd-file> [--name <spec-name>] [--one-shot]
+spec new <prd-file> [--name <spec-name>] [--one-shot]
     Create a new spec in the campaign from a PRD. The spec directory is
     named {NN}_{spec-name} (next available number). In one-shot mode,
     assess → accept → generate → validate in one pass. In interactive
     mode (default), assess and pause for refinement.
 
-af-spec assess <spec>
+spec assess <spec>
     Run or re-run the PRD assessment for a spec. Prints the assessment
     summary, gaps, and structured questions (if any). <spec> is the
     spec directory name (e.g. "01_data_models") or number (e.g. "01").
 
-af-spec refine <spec> --answers <file>
+spec refine <spec> --answers <file>
     Submit answers to the agent's questions as a JSON file mapping
     question IDs to answer strings. The agent updates the PRD and
     re-assesses. Repeat until no questions remain.
 
-af-spec accept <spec>
+spec accept <spec>
     Accept the PRD in its current state, ending the refinement loop.
 
-af-spec generate <spec>
+spec generate <spec>
     Generate the JSON artifacts from the accepted PRD.
 
-af-spec validate <spec>
+spec validate <spec>
     Run schema and cross-file integrity checks on the spec package.
 
-af-spec render <spec> [--combined]
+spec render <spec> [--combined]
     Render the spec as markdown.
 
-af-spec show <spec> [--artifact <name>]
+spec show <spec> [--artifact <name>]
     Display an artifact or the session state.
 
-af-spec status [<spec>]
+spec status [<spec>]
     Print the session state. Without <spec>, show all specs in the
     campaign.
 ```
@@ -632,35 +632,35 @@ af-spec status [<spec>]
 **Hub interaction commands:**
 
 ```
-af-spec submit --hub <url> [<spec>]
+spec submit --hub <url> [<spec>]
     Push a completed spec to the hub, adding it to the campaign in the
     hub's spec store. The hub creates a SpecRef. Without <spec>, submits
     all completed specs. Requires a running hub.
 ```
 
-**Working directory convention.** `af-spec` commands operate relative
+**Working directory convention.** `spec` commands operate relative
 to the current directory, which must be a campaign directory (one that
 contains `campaign.yaml`). The `--campaign-dir` flag can override this.
 The campaign directory is self-contained: it holds campaign metadata,
 spec directories, and session state.
 
-**One-shot mode.** `af-spec new --one-shot` runs the full pipeline in a
+**One-shot mode.** `spec new --one-shot` runs the full pipeline in a
 single invocation: assess → accept (regardless of gaps) → generate →
-validate. The user reviews the output with `af-spec show` or
-`af-spec render`, then submits. This is for cases where the PRD is
+validate. The user reviews the output with `spec show` or
+`spec render`, then submits. This is for cases where the PRD is
 known to be complete or where speed matters more than refinement.
 
-**Interactive mode.** The default. `af-spec new` creates the spec and
+**Interactive mode.** The default. `spec new` creates the spec and
 runs the initial assessment. If the agent has questions, the user answers
-them with `af-spec refine <spec> --answers answers.json` and the agent
-re-assesses. The loop continues until the user runs `af-spec accept`.
-Then `af-spec generate` produces the artifacts.
+them with `spec refine <spec> --answers answers.json` and the agent
+re-assesses. The loop continues until the user runs `spec accept`.
+Then `spec generate` produces the artifacts.
 
 ### 7.3 Spec skill
 
 An agent skill that exposes speclib capabilities to agent CLIs (Claude
 Code, Gemini CLI, etc.). The skill drives speclib's session model
-programmatically rather than through the `af-spec` CLI.
+programmatically rather than through the `spec` CLI.
 
 **Interactive mode.** The user asks the agent to create a spec (e.g.,
 "create a spec for feature X from this PRD"). The agent:
@@ -680,7 +680,7 @@ which runs assess → accept → generate in sequence, then presents the
 result.
 
 The skill does not require the hub to be running for authoring. It
-invokes `af-spec submit` only when the user explicitly asks to push to
+invokes `spec submit` only when the user explicitly asks to push to
 the hub.
 
 ### 7.4 Relationship to the harness
@@ -689,18 +689,18 @@ speclib has two roles: **authoring** (creating specs) and **runtime**
 (validation, rendering, prompt assembly for the hub). Only the authoring
 role uses the Claude Agent SDK; the runtime role is pure Python.
 
-- **`af-spec` and the spec skill** handle authoring standalone. They
+- **`spec` and the spec skill** handle authoring standalone. They
   work against a local campaign directory, produce spec packages, and
-  push them to the hub via `af-spec submit`.
-- **`af-spec submit`** pushes a completed spec to the hub's spec store.
+  push them to the hub via `spec submit`.
+- **`spec submit`** pushes a completed spec to the hub's spec store.
   The hub creates a SpecRef and makes the spec available for execution.
   The spec arrives in `draft` status.
-- **`af spec approve`** (the `af` CLI, not `af-spec`) transitions a spec
+- **`af spec approve`** (the `af` CLI, not `spec`) transitions a spec
   from `draft` to `active` — computing the `intent_hash`, freezing the
   package, and updating the SpecRef. This is a hub operation because
   approval has consequences for the operational store (the spec becomes
   visible to agents and executable against).
-- **`af-spec import`** pulls an existing campaign from the hub into a
+- **`spec import`** pulls an existing campaign from the hub into a
   local working directory. This gives the agent context about existing
   specs when authoring a new one that depends on them.
 - The **Planner specialist** uses speclib's session model inside the
@@ -710,7 +710,7 @@ role uses the Claude Agent SDK; the runtime role is pure Python.
   rather than through the CLI.
 - The **hub** uses speclib's non-agent operations (validate, render) at
   execution time. It reads from the spec store filesystem — the same
-  directory that `af-spec submit` writes to.
+  directory that `spec submit` writes to.
 - Only specs in `active` status or later are served by the harness API.
   Draft specs are invisible to the harness.
 

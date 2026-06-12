@@ -82,7 +82,7 @@ class TestInstallCopiesFile:
         (patched_home / ".claude").mkdir()
         result = cli_runner.invoke(cli, ["install-skill"])
         assert result.exit_code == 0, f"Expected exit code 0, got: {result.output}"
-        installed = patched_home / ".claude" / "skills" / "af-spec.md"
+        installed = patched_home / ".claude" / "skills" / "spec.md"
         assert installed.exists(), "Installed skill file must exist"
         assert installed.read_text() == SKILL_FILE_PATH.read_text(), (
             "Installed file content must match source"
@@ -106,7 +106,7 @@ class TestInstallWithTarget:
 
         result = cli_runner.invoke(cli, ["install-skill", "--target", "claude"])
         assert result.exit_code == 0, f"Expected exit code 0, got: {result.output}"
-        installed = patched_home / ".claude" / "skills" / "af-spec.md"
+        installed = patched_home / ".claude" / "skills" / "spec.md"
         assert installed.exists(), "Installed skill file must exist with --target"
 
 
@@ -128,11 +128,11 @@ class TestInstallOverwrites:
 
         skill_dir = patched_home / ".claude" / "skills"
         skill_dir.mkdir(parents=True)
-        (skill_dir / "af-spec.md").write_text("old content")
+        (skill_dir / "spec.md").write_text("old content")
 
         result = cli_runner.invoke(cli, ["install-skill", "--target", "claude"])
         assert result.exit_code == 0, f"Expected exit code 0, got: {result.output}"
-        assert (skill_dir / "af-spec.md").read_text() == SKILL_FILE_PATH.read_text(), (
+        assert (skill_dir / "spec.md").read_text() == SKILL_FILE_PATH.read_text(), (
             "File content must be replaced with current skill file content"
         )
         output_lower = result.output.lower()
@@ -158,7 +158,7 @@ class TestInstallSuccessMessage:
 
         result = cli_runner.invoke(cli, ["install-skill", "--target", "claude"])
         assert result.exit_code == 0, f"Expected exit code 0, got: {result.output}"
-        assert ".claude/skills/af-spec.md" in result.output, (
+        assert ".claude/skills/spec.md" in result.output, (
             "Output must contain the installed file path"
         )
 
@@ -208,7 +208,7 @@ class TestEdgeCases:
         assert (patched_home / ".claude" / "skills").is_dir(), (
             "Skills directory must be created"
         )
-        assert (patched_home / ".claude" / "skills" / "af-spec.md").exists(), (
+        assert (patched_home / ".claude" / "skills" / "spec.md").exists(), (
             "Skill file must be installed"
         )
 
@@ -225,7 +225,7 @@ class TestEdgeCases:
         """
         from spec_cli.cli import cli
 
-        with patch("spec_cli.skill.SKILL_FILE_PATH", Path("/nonexistent/af-spec.md")):
+        with patch("spec_cli.skill.SKILL_FILE_PATH", Path("/nonexistent/spec.md")):
             result = cli_runner.invoke(cli, ["install-skill", "--target", "claude"])
         assert result.exit_code != 0, (
             "Must exit with non-zero code when source file is missing"
@@ -261,7 +261,7 @@ class TestProperties:
         result = cli_runner.invoke(cli, ["install-skill", "--target", target])
         assert result.exit_code == 0, f"Expected exit code 0, got: {result.output}"
         target_dirs = {"claude": ".claude/skills", "gemini": ".gemini/skills"}
-        installed = patched_home / target_dirs[target] / "af-spec.md"
+        installed = patched_home / target_dirs[target] / "spec.md"
         assert installed.read_bytes() == SKILL_FILE_PATH.read_bytes(), (
             f"Installed file for target '{target}' must be byte-identical to source"
         )
@@ -288,14 +288,14 @@ class TestSmoke:
         (patched_home / ".claude").mkdir()
         result = cli_runner.invoke(cli, ["install-skill"])
         assert result.exit_code == 0, f"Expected exit code 0, got: {result.output}"
-        installed = patched_home / ".claude" / "skills" / "af-spec.md"
+        installed = patched_home / ".claude" / "skills" / "spec.md"
         assert installed.exists(), "Installed skill file must exist"
         assert installed.read_bytes() == SKILL_FILE_PATH.read_bytes(), (
             "Installed file must be byte-identical to source"
         )
         has_path_in_output = (
             str(installed) in result.output
-            or ".claude/skills/af-spec.md" in result.output
+            or ".claude/skills/spec.md" in result.output
         )
         assert has_path_in_output, (
             "Success message must include the installed file path"

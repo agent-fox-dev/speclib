@@ -17,7 +17,7 @@ output, and proper cleanup on error/interrupt.
 - Mocked session with agent returning assessment.
 
 **Input:**
-- CLI invocation: `af-spec assess 01` (no `--quiet`).
+- CLI invocation: `spec assess 01` (no `--quiet`).
 
 **Expected:**
 - stderr contains "Assessing PRD".
@@ -40,7 +40,7 @@ ASSERT "Assessing" IN captured_stderr
 - Mocked session, valid answers file.
 
 **Input:**
-- CLI invocation: `af-spec refine 01 --answers answers.json`.
+- CLI invocation: `spec refine 01 --answers answers.json`.
 
 **Expected:**
 - stderr contains "Refining".
@@ -61,7 +61,7 @@ ASSERT "Refining" IN captured_stderr
 - Mocked session with generate returning artifacts.
 
 **Input:**
-- CLI invocation: `af-spec generate 01`.
+- CLI invocation: `spec generate 01`.
 
 **Expected:**
 - stderr contains "Generating requirements" or similar.
@@ -152,7 +152,7 @@ ASSERT "\x1b" NOT IN captured_stderr  # no ANSI escapes
 **Preconditions:** None.
 
 **Input:**
-- `af-spec --quiet assess 01` and `af-spec -q assess 01`.
+- `spec --quiet assess 01` and `spec -q assess 01`.
 
 **Expected:**
 - Both invocations succeed (exit code 0 or expected error, not "unknown option").
@@ -175,7 +175,7 @@ ASSERT "no such option" NOT IN result2.output.lower()
 - Mocked session.
 
 **Input:**
-- `af-spec --quiet assess 01`.
+- `spec --quiet assess 01`.
 
 **Expected:**
 - stderr does NOT contain spinner or phase messages.
@@ -196,7 +196,7 @@ ASSERT "Assessing" NOT IN captured_stderr
 - Mocked session returning assessment.
 
 **Input:**
-- `af-spec --quiet assess 01`.
+- `spec --quiet assess 01`.
 
 **Expected:**
 - stdout contains assessment output.
@@ -411,7 +411,7 @@ assessment on stdout.
 **Setup:** Mock only the agent API call. Do not mock `StatusSpinner`,
 `cli.py`, or `SpecSession`.
 
-**Trigger:** `af-spec --campaign-dir <dir> assess 01`
+**Trigger:** `spec --campaign-dir <dir> assess 01`
 
 **Expected side effects:**
 - stderr contains "Assessing" phase message.
@@ -435,7 +435,7 @@ ASSERT "quality" IN result.output.lower()
 
 **Setup:** Mock only the agent API call.
 
-**Trigger:** `af-spec --quiet --campaign-dir <dir> assess 01`
+**Trigger:** `spec --quiet --campaign-dir <dir> assess 01`
 
 **Expected side effects:**
 - stderr is empty (no spinner).

@@ -10,7 +10,7 @@
 
 ## Overview
 
-This feature adds question-export mode to `af-spec refine`. Implementation is
+This feature adds question-export mode to `spec refine`. Implementation is
 split into three groups: failing tests, library method, and CLI wiring. The
 change is small and self-contained — two files modified (`session.py`, `cli.py`)
 plus one test file.

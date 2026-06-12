@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This specification defines the `af-spec` command-line interface for speclib.
+This specification defines the `spec` command-line interface for speclib.
 The CLI provides local-only campaign management and spec authoring commands
 using the Click framework, wrapping the speclib library for all business
 logic. Hub-related commands (submit, import) are out of scope.
@@ -11,7 +11,7 @@ logic. Hub-related commands (submit, import) are out of scope.
 
 | Term | Definition |
 |------|-----------|
-| af-spec | The CLI entry point installed as a console script via pyproject.toml |
+| spec | The CLI entry point installed as a console script via pyproject.toml |
 | Click | Python CLI framework used for argument parsing and help generation |
 | campaign directory | A directory containing `campaign.yaml` and zero or more spec subdirectories |
 | spec argument | A CLI argument that identifies a spec by full directory name (e.g., `01_data_models`) or numeric prefix (e.g., `01`) |
@@ -26,9 +26,9 @@ logic. Hub-related commands (submit, import) are out of scope.
 **User Story:** As a user, I want to create a new campaign directory from the command line, so that I can begin authoring specs in an organized workspace.
 
 #### Acceptance Criteria
-1. [04-REQ-1.1] WHEN `af-spec init <path> --name <name> --description <text>` is invoked, THE CLI SHALL call `Campaign.create(path, name, description)` and print a confirmation message including the absolute path of the created campaign directory.
-2. [04-REQ-1.2] WHEN `af-spec init` is invoked without `--name`, THE CLI SHALL use the directory's basename as the campaign name.
-3. [04-REQ-1.3] WHEN `af-spec init` is invoked without `--description`, THE CLI SHALL use an empty string as the description.
+1. [04-REQ-1.1] WHEN `spec init <path> --name <name> --description <text>` is invoked, THE CLI SHALL call `Campaign.create(path, name, description)` and print a confirmation message including the absolute path of the created campaign directory.
+2. [04-REQ-1.2] WHEN `spec init` is invoked without `--name`, THE CLI SHALL use the directory's basename as the campaign name.
+3. [04-REQ-1.3] WHEN `spec init` is invoked without `--description`, THE CLI SHALL use an empty string as the description.
 4. [04-REQ-1.4] WHEN `Campaign.create()` raises a `CampaignError`, THE CLI SHALL print the error message to stderr and exit with code 1.
 
 #### Edge Cases
@@ -39,8 +39,8 @@ logic. Hub-related commands (submit, import) are out of scope.
 **User Story:** As a user, I want to list all specs in a campaign directory with their session state, so that I can see what specs exist and their progress.
 
 #### Acceptance Criteria
-1. [04-REQ-2.1] WHEN `af-spec list` is invoked from within a campaign directory, THE CLI SHALL display a table with columns: spec number, spec name, session state, and artifact count.
-2. [04-REQ-2.2] WHEN `af-spec list <campaign-dir>` is invoked with an explicit path, THE CLI SHALL open that directory as the campaign.
+1. [04-REQ-2.1] WHEN `spec list` is invoked from within a campaign directory, THE CLI SHALL display a table with columns: spec number, spec name, session state, and artifact count.
+2. [04-REQ-2.2] WHEN `spec list <campaign-dir>` is invoked with an explicit path, THE CLI SHALL open that directory as the campaign.
 3. [04-REQ-2.3] WHEN a campaign directory contains no specs, THE CLI SHALL print a message indicating the campaign is empty and exit with code 0.
 4. [04-REQ-2.4] THE table output SHALL sort specs by numeric prefix in ascending order.
 
@@ -52,7 +52,7 @@ logic. Hub-related commands (submit, import) are out of scope.
 **User Story:** As a user, I want to create a new spec from a PRD file, so that I can begin the spec authoring process.
 
 #### Acceptance Criteria
-1. [04-REQ-3.1] WHEN `af-spec new <prd-file>` is invoked, THE CLI SHALL call `campaign.new_spec()` with the PRD file contents and print the created spec directory name.
+1. [04-REQ-3.1] WHEN `spec new <prd-file>` is invoked, THE CLI SHALL call `campaign.new_spec()` with the PRD file contents and print the created spec directory name.
 2. [04-REQ-3.2] WHEN `--name <spec-name>` is provided, THE CLI SHALL use it as the spec name. WHEN omitted, THE CLI SHALL derive the name from the PRD filename (stripping extension, converting to snake_case).
 3. [04-REQ-3.3] WHEN `--one-shot` is provided, THE CLI SHALL set the session mode to "one-shot" (skipping the interactive refinement loop).
 4. [04-REQ-3.4] WHEN the PRD file does not exist, THE CLI SHALL print an error message and exit with code 1.
@@ -65,7 +65,7 @@ logic. Hub-related commands (submit, import) are out of scope.
 **User Story:** As a user, I want to run or re-run PRD assessment from the command line, so that I can get quality feedback and improvement suggestions for my PRD.
 
 #### Acceptance Criteria
-1. [04-REQ-4.1] WHEN `af-spec assess <spec>` is invoked, THE CLI SHALL resolve the spec, call `session.assess()`, and print the assessment summary including quality score, identified gaps, and questions for the user.
+1. [04-REQ-4.1] WHEN `spec assess <spec>` is invoked, THE CLI SHALL resolve the spec, call `session.assess()`, and print the assessment summary including quality score, identified gaps, and questions for the user.
 2. [04-REQ-4.2] THE assessment output SHALL be formatted with clear section headers for quality, gaps, and questions.
 3. [04-REQ-4.3] WHEN the session is not in a state that allows assessment (not `init` or `refining`), THE CLI SHALL print an error explaining the current state and which states allow assessment, then exit with code 1.
 
@@ -77,7 +77,7 @@ logic. Hub-related commands (submit, import) are out of scope.
 **User Story:** As a user, I want to submit answers to assessment questions and have the agent update the PRD, so that I can iteratively improve my spec.
 
 #### Acceptance Criteria
-1. [04-REQ-5.1] WHEN `af-spec refine <spec> --answers <file>` is invoked, THE CLI SHALL read the JSON file, call `session.refine(answers)`, and print a confirmation that the PRD has been updated.
+1. [04-REQ-5.1] WHEN `spec refine <spec> --answers <file>` is invoked, THE CLI SHALL read the JSON file, call `session.refine(answers)`, and print a confirmation that the PRD has been updated.
 2. [04-REQ-5.2] WHEN the answers file does not exist, THE CLI SHALL print an error message and exit with code 1.
 3. [04-REQ-5.3] WHEN the answers file contains invalid JSON, THE CLI SHALL print a parse error message and exit with code 1.
 4. [04-REQ-5.4] WHEN the session is not in `refining` state, THE CLI SHALL print an error explaining the current state and exit with code 1.
@@ -91,7 +91,7 @@ logic. Hub-related commands (submit, import) are out of scope.
 **User Story:** As a user, I want to accept the PRD and end the refinement loop, so that I can proceed to artifact generation.
 
 #### Acceptance Criteria
-1. [04-REQ-6.1] WHEN `af-spec accept <spec>` is invoked, THE CLI SHALL call `session.accept_prd()` and print a confirmation message including the new session state.
+1. [04-REQ-6.1] WHEN `spec accept <spec>` is invoked, THE CLI SHALL call `session.accept_prd()` and print a confirmation message including the new session state.
 2. [04-REQ-6.2] WHEN the session is not in a state that allows acceptance (not `assessing` or `refining`), THE CLI SHALL print an error explaining the current state and which states allow acceptance, then exit with code 1.
 
 #### Edge Cases
@@ -102,7 +102,7 @@ logic. Hub-related commands (submit, import) are out of scope.
 **User Story:** As a user, I want to generate the full set of JSON artifacts from my accepted PRD, so that I can produce the complete spec package.
 
 #### Acceptance Criteria
-1. [04-REQ-7.1] WHEN `af-spec generate <spec>` is invoked, THE CLI SHALL call `session.generate()` and print progress indicators for each artifact being generated.
+1. [04-REQ-7.1] WHEN `spec generate <spec>` is invoked, THE CLI SHALL call `session.generate()` and print progress indicators for each artifact being generated.
 2. [04-REQ-7.2] WHEN generation completes successfully, THE CLI SHALL print a summary listing all generated artifacts.
 3. [04-REQ-7.3] WHEN the session is not in `prd_accepted` state, THE CLI SHALL print an error explaining the current state and that the PRD must be accepted first, then exit with code 1.
 
@@ -114,7 +114,7 @@ logic. Hub-related commands (submit, import) are out of scope.
 **User Story:** As a user, I want to run schema and cross-file validation on a spec, so that I can verify correctness before using or sharing it.
 
 #### Acceptance Criteria
-1. [04-REQ-8.1] WHEN `af-spec validate <spec>` is invoked, THE CLI SHALL call `session.validate()` and display the validation results.
+1. [04-REQ-8.1] WHEN `spec validate <spec>` is invoked, THE CLI SHALL call `session.validate()` and display the validation results.
 2. [04-REQ-8.2] WHEN validation passes with no errors, THE CLI SHALL print a success message and exit with code 0.
 3. [04-REQ-8.3] WHEN validation finds errors, THE CLI SHALL print each error with its file, path (within the file), and error message, then exit with code 1.
 4. [04-REQ-8.4] THE error list SHALL be formatted as a table with columns: file, path, message.
@@ -127,7 +127,7 @@ logic. Hub-related commands (submit, import) are out of scope.
 **User Story:** As a user, I want to render a spec as markdown, so that I can review it in a human-readable format.
 
 #### Acceptance Criteria
-1. [04-REQ-9.1] WHEN `af-spec render <spec>` is invoked, THE CLI SHALL call `session.render()` and print the rendered markdown to stdout.
+1. [04-REQ-9.1] WHEN `spec render <spec>` is invoked, THE CLI SHALL call `session.render()` and print the rendered markdown to stdout.
 2. [04-REQ-9.2] WHEN `--combined` is provided, THE CLI SHALL call `session.render(combined=True)` to produce a single combined markdown document.
 3. [04-REQ-9.3] WHEN `--combined` is not provided, THE CLI SHALL call `session.render(combined=False)` and print each artifact's rendered markdown separated by a header line.
 
@@ -139,10 +139,10 @@ logic. Hub-related commands (submit, import) are out of scope.
 **User Story:** As a user, I want to inspect the current session state and view individual artifacts, so that I can understand where I am in the authoring process.
 
 #### Acceptance Criteria
-1. [04-REQ-10.1] WHEN `af-spec status` is invoked without a spec argument, THE CLI SHALL display a table of all specs in the campaign with their session state (same as `list` but focused on state).
-2. [04-REQ-10.2] WHEN `af-spec status <spec>` is invoked, THE CLI SHALL display detailed session state for that spec, including: state, mode, assessment count, Q&A exchange count, and list of generated artifacts.
-3. [04-REQ-10.3] WHEN `af-spec show <spec>` is invoked without `--artifact`, THE CLI SHALL display the session state summary (same as `status <spec>`).
-4. [04-REQ-10.4] WHEN `af-spec show <spec> --artifact <name>` is invoked, THE CLI SHALL read and display the content of the named artifact file from the spec directory.
+1. [04-REQ-10.1] WHEN `spec status` is invoked without a spec argument, THE CLI SHALL display a table of all specs in the campaign with their session state (same as `list` but focused on state).
+2. [04-REQ-10.2] WHEN `spec status <spec>` is invoked, THE CLI SHALL display detailed session state for that spec, including: state, mode, assessment count, Q&A exchange count, and list of generated artifacts.
+3. [04-REQ-10.3] WHEN `spec show <spec>` is invoked without `--artifact`, THE CLI SHALL display the session state summary (same as `status <spec>`).
+4. [04-REQ-10.4] WHEN `spec show <spec> --artifact <name>` is invoked, THE CLI SHALL read and display the content of the named artifact file from the spec directory.
 5. [04-REQ-10.5] WHEN the named artifact does not exist, THE CLI SHALL print an error listing available artifacts and exit with code 1.
 
 #### Edge Cases
@@ -152,7 +152,7 @@ logic. Hub-related commands (submit, import) are out of scope.
 
 #### Campaign Directory Resolution
 
-1. [04-REQ-CC.1] THE `af-spec` command group SHALL accept a `--campaign-dir` option that overrides the default CWD-based campaign directory resolution.
+1. [04-REQ-CC.1] THE `spec` command group SHALL accept a `--campaign-dir` option that overrides the default CWD-based campaign directory resolution.
 2. [04-REQ-CC.2] WHEN `--campaign-dir` is not provided, THE CLI SHALL use the current working directory as the campaign directory.
 3. [04-REQ-CC.3] WHEN a subcommand requires a campaign directory and the resolved directory does not contain `campaign.yaml`, THE CLI SHALL print an error message explaining that the command must be run from within a campaign directory (or use `--campaign-dir`), and exit with code 1.
 
