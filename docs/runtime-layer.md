@@ -4,7 +4,7 @@
 **Status:** Draft
 
 This document specifies the runtime layer that sits underneath the af
-coordination layer. It covers container isolation, git worktree management,
+coordination layer. It covers container isolation, git branch management,
 harness adapters, agent lifecycle, templates, sidecar services, and the af
 SDK. The design follows patterns established by Google's Scion project,
 adapted to our requirements.
@@ -19,8 +19,8 @@ architecture (hub, CLI, storage, deployment) is specified in
 ## 1. Design principles
 
 1. **Thin and focused.** The runtime handles infrastructure; it has no opinion
-   on specs, Contexts, coordination, or verification. It starts containers,
-   manages worktrees, and exposes agent lifecycle operations.
+   on specs, Contexts, coordination, or verification. It starts sandboxes,
+   manages branches, and exposes agent lifecycle operations.
 
 2. **Provider-agnostic.** Anthropic, Google, open-weight, and local models
    are interchangeable through one harness adapter interface. Provider SDK
@@ -28,15 +28,16 @@ architecture (hub, CLI, storage, deployment) is specified in
    the same interface.
 
 3. **Sandbox-first isolation.** Each agent runs in its own sandbox managed
-   by [NVIDIA OpenShell](https://github.com/NVIDIA/OpenShell). The worktree
-   is mounted in; everything else (spec store, harness configuration, sibling
-   agents) is invisible. OpenShell enforces isolation out-of-process through
+   by [NVIDIA OpenShell](https://github.com/NVIDIA/OpenShell). The repo is
+   cloned inside the sandbox and checked out to the workspace branch;
+   everything else (spec store, harness configuration, sibling agents) is
+   invisible. OpenShell enforces isolation out-of-process through
    defense-in-depth: kernel-level filesystem restrictions, network egress
    filtering, and syscall sandboxing — the agent cannot override its own
    guardrails.
 
 4. **The coordination layer drives.** The runtime exposes a narrow API. The
-   coordination layer calls it to start/stop agents, provision worktrees, and
+   coordination layer calls it to start/stop agents, provision branches, and
    inject configuration. The runtime never calls back into the coordination
    layer — the af SDK handles that direction (§8).
 
@@ -67,7 +68,7 @@ interface ContainerRuntime:
 record ContainerSpec:
     image:      string
     name:       string
-    mounts:     list[Mount]              -- worktree, agent home
+    mounts:     list[Mount]              -- agent home, optional host mounts
     env:        map[string, string]
     command:    list[string]
     services:   list[ServiceSpec]        -- sidecar processes
@@ -108,13 +109,12 @@ OpenShell sandbox operation:
 | `logs(id, follow)` | `openshell logs --tail` |
 | `inspect(id)` | Sandbox status query via API |
 
-**Mounts.** The agent's worktree is mounted at `/workspace`. The agent's
-home directory is mounted at a configurable path (default `/home/agent`).
-OpenShell's filesystem policy locks allowed paths at sandbox creation via
-Landlock LSM — kernel-enforced, not bypassable from inside the sandbox.
-Shadow mounts for `.af` configuration and sibling worktrees are unnecessary:
-the Landlock policy denies access to paths not explicitly allowed, which is
-a stronger guarantee than tmpfs overlays.
+**Repository checkout.** The sandbox clones the project repository and
+checks out the workspace branch at `/workspace`. Each sandbox gets its own
+independent clone — no shared git state between sandboxes. The agent's home
+directory is at a configurable path (default `/home/agent`). OpenShell's
+filesystem policy locks allowed paths at sandbox creation via Landlock
+LSM — kernel-enforced, not bypassable from inside the sandbox.
 
 **Credential injection.** OpenShell manages credentials as *providers*:
 named credential bundles injected into sandboxes at creation. The CLI
@@ -171,32 +171,32 @@ pod scheduling) are handled by OpenShell, not by the af runtime.
 For environments where OpenShell is not available (minimal setups, custom
 container runtimes), the `ContainerRuntime` interface supports a direct
 Podman or Docker adapter. This fallback uses the container engine's socket
-API directly, with bind mounts for the worktree and agent home. It provides
+API directly, with the repo cloned and checked out inside the container. It provides
 process-level isolation but lacks OpenShell's defense-in-depth (no Landlock,
 no network proxy, no inference routing). The interface contract is
 identical; only the isolation guarantees are weaker.
 
 ---
 
-## 3. Git worktree management
+## 3. Git branch management
 
-The runtime manages per-workspace git worktrees. This is the mechanism behind
-workspace isolation (see [coordination-layer.md §3.2](coordination-layer.md#32-isolation-through-worktrees)).
+Each workspace gets its own branch. The sandbox provides filesystem
+isolation — each sandbox clones the repo and checks out the workspace
+branch, so parallel workspaces never share a working directory.
 
 ```
-interface WorktreeManager:
+interface BranchManager:
     create(input: {
-        repoPath:   string    -- path to the main repo
+        repoUrl:    string    -- remote URL or local path to clone from
         branch:     string    -- e.g. "af/add-dark-mode"
         baseBranch: string    -- e.g. "main"
-    }) → WorktreeInfo
+    }) → BranchInfo
 
-    remove(worktreePath: string, deleteBranch: boolean) → void
+    delete(branch: string) → void
 
-    list(repoPath: string) → list[WorktreeInfo]
+    list(repoUrl: string) → list[BranchInfo]
 
-record WorktreeInfo:
-    path:       string   -- absolute path to the worktree directory
+record BranchInfo:
     branch:     string
     baseBranch: string
     head:       string   -- current commit SHA
@@ -208,19 +208,23 @@ Branches follow the convention `af/<workspace-name>`, e.g.
 `af/add-dark-mode`. The prefix is configurable per installation. Collisions
 are rejected at creation.
 
-### 3.2 Worktree location
+### 3.2 Sandbox checkout
 
-Worktrees are created outside the main repo's working directory to avoid
-polluting it: `<repo-parent>/.af_worktrees/<workspace-id>/`. Each
-worktree is a full working directory checked out to its branch.
+When a sandbox starts, the runtime clones the repo inside the sandbox
+filesystem and checks out the workspace branch at `/workspace`. The clone
+is fresh — no untracked files, environment files, secrets, or installed
+dependencies carry over. Each sandbox has its own independent clone; there
+is no shared git state between sandboxes.
 
 ### 3.3 Lifecycle
 
-- **Create:** `git worktree add` from the base branch. The worktree is
-  empty of untracked files (no env files, secrets, or installed
-  dependencies carry over from the main checkout).
-- **Remove:** `git worktree remove` plus optional `git branch -d`. The
-  coordination layer decides when to remove (see
+- **Create:** `git branch` from the base branch. The branch exists in the
+  remote but no checkout happens until a sandbox starts.
+- **Sandbox start:** `git clone --branch <workspace-branch>` inside the
+  sandbox. The clone is ephemeral — it lives only for the sandbox's
+  lifetime.
+- **Delete:** `git branch -d` when the workspace is deleted. The
+  coordination layer decides when to delete (see
   [coordination-layer.md §3.7](coordination-layer.md#37-workspace-ownership-and-management));
   the runtime executes it.
 
@@ -273,7 +277,7 @@ interface HarnessAdapter:
     provision(input: {
         agentName:     string
         agentHome:     string   -- host path to agent home dir
-        workspacePath: string   -- host path to worktree
+        workspacePath: string   -- path to workspace checkout
     }) → void
 
     -- Inject system prompt content into the harness's expected location.
@@ -507,7 +511,7 @@ interface AgentLifecycle:
     suspend(ref: AgentRef) → void
 
     -- Remove agent: stop if running, delete container, optionally
-    -- delete home directory and worktree branch.
+    -- delete home directory and workspace branch.
     delete(ref: AgentRef, cleanup: { branch: boolean; home: boolean }, optional) → void
 
     -- Send a message to a running agent's input stream.
@@ -692,7 +696,7 @@ support. The af SDK handles only the *inbound* direction (agent → hub).
 │  └──────────┬───────────────────────────┘           │   │
 │             │                                       │   │
 │        /workspace                                   │   │
-│        (mounted worktree)                           │   │
+│        (branch checkout)                            │   │
 └─────────────────────────────────────────────────────┼───┘
                                                       │
                                          ┌────────────▼────────────┐
@@ -739,8 +743,8 @@ an agent that stops making SDK calls for a configurable duration (default
 
 The full sequence from workspace creation to a running agent:
 
-1. **Coordination layer** calls `WorktreeManager.create()` to provision the
-   branch and worktree.
+1. **Coordination layer** calls `BranchManager.create()` to provision the
+   workspace branch.
 
 2. **Coordination layer** assembles the agent configuration: resolves the
    specialist to a template, composes the system prompt (see
@@ -757,8 +761,7 @@ The full sequence from workspace creation to a running agent:
    `injectInstructions()`, calls `applyMCPServers()` to translate external
    MCP server configs into the harness's native format.
 
-5. **Runtime** builds the `ContainerSpec`: image, mounts (worktree at
-   `/workspace`, agent home), env vars (including af SDK connection
+5. **Runtime** builds the `ContainerSpec`: image, env vars (including af SDK connection
    parameters), and the harness command.
 
 6. **Runtime** calls `ContainerRuntime.create()` and
@@ -830,9 +833,8 @@ generic:
   model: ollama:qwen3-32b     # LangChain provider:model string
   prompt_tier: local           # frontier | mid-tier | local — selects prompt variant
 
-worktrees:
+branches:
   prefix: af                # branch prefix: af/<workspace-name>
-  location: ../.af_worktrees  # relative to repo root
 
 spec_tool:
   model: claude-sonnet-4-6  # model for PRD assessment and artifact generation

@@ -10,7 +10,7 @@ stops, and recovers.
 
 The coordination layer (domain model, spec package, agents, orchestration)
 is specified in [coordination-layer.md](coordination-layer.md). The runtime
-layer (containers, worktrees, adapters, agent lifecycle) is specified in
+layer (sandboxes, branches, adapters, agent lifecycle) is specified in
 [runtime-layer.md](runtime-layer.md).
 
 ---
@@ -214,7 +214,7 @@ Two paths to create a spec:
 
 The runtime engine (specified in [runtime-layer.md](runtime-layer.md)) runs
 as a library embedded in the hub, not as a separate process. The hub
-calls it to create sandboxes, start agents, and manage worktrees.
+calls it to create sandboxes, start agents, and manage branches.
 
 This means the hub process is the only thing the Operator needs to start.
 [NVIDIA OpenShell](https://github.com/NVIDIA/OpenShell) must be installed
@@ -227,13 +227,14 @@ host.
 
 - On hub startup: the runtime engine initializes, connects to the
   container backend, and inventories existing containers.
-- On workspace create: the runtime creates the worktree.
+- On workspace create: the runtime creates the workspace branch.
 - On run start: the runtime provisions and starts agent sandboxes with
-  templates and mounted worktrees. The af SDK (imported by the adapter)
-  connects to the hub on first use.
+  templates. The sandbox clones the repo and checks out the workspace
+  branch. The af SDK (imported by the adapter) connects to the hub on
+  first use.
 - On agent stop/suspend: the runtime stops or suspends the container.
 - On workspace delete: the runtime removes containers and optionally the
-  worktree and branch.
+  workspace branch.
 
 ---
 
@@ -753,8 +754,8 @@ Configuration and data are stored in separate directory trees.
     coordinator/
     implementor/
     verifier/
-  # Worktrees live near the repo, not here — see runtime-layer.md §3.2
-  # Location: <repo-parent>/.af_worktrees/<workspace-id>/
+  # Workspace branches are checked out inside sandboxes, not on the host.
+  # See runtime-layer.md §3.2
 ```
 
 ### 8.2 Database schema (SQLite)
@@ -762,8 +763,8 @@ Configuration and data are stored in separate directory trees.
 The operational store tables map directly to the entities in
 [coordination-layer.md §9.3](coordination-layer.md#93-operational-store):
 
-- `workspaces` — id, name, status, owner, origin, branch, worktree_path,
-  base_branch, remote, campaign_id, created_at, updated_at
+- `workspaces` — id, name, status, owner, origin, branch, base_branch,
+  remote, campaign_id, created_at, updated_at
 - `workspace_configs` — workspace_id, setup_scripts (JSON), default_provider,
   default_model
 - `campaigns` — id, name, status, goal_document, shared_context_ids (JSON),
@@ -807,9 +808,9 @@ Memory tables (embedded mode only):
 Harness state is split between the config directory (`~/.af/`) and the data
 directory (`<data_dir>`). Backup requires copying both:
 `cp -r ~/.af/ <backup>/config && cp -r <data_dir> <backup>/data`. Moving
-to a new machine is the same copy plus re-creating worktrees (which are
-tied to the local git repo path) and setting `data_dir` in the new
-machine's `~/.af/settings.yaml`.
+to a new machine is the same copy plus setting `data_dir` in the new
+machine's `~/.af/settings.yaml`. Workspace branches live in the remote
+repo and are cloned on demand when sandboxes start.
 
 ---
 
@@ -909,7 +910,7 @@ at the bridge boundary.
 ### 10.2 Sandbox isolation
 
 Detailed in [runtime-layer.md §2.1](runtime-layer.md#21-openshell-adapter-default).
-The key guarantee: an agent sandbox sees only its mounted worktree, its
+The key guarantee: an agent sandbox sees only its workspace checkout, its
 agent home directory, and the af SDK's gRPC connection to the hub. It cannot see the af
 database, other agents' homes, or the spec store on the host filesystem.
 

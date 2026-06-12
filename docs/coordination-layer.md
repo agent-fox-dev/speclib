@@ -9,7 +9,7 @@ integration, agent model, multi-agent orchestration, key flows, data model,
 and API surface. It is the largest of the three layer specifications and the
 one most developers will read first.
 
-The runtime layer (container isolation, worktree management, harness adapters,
+The runtime layer (sandbox isolation, branch management, harness adapters,
 agent lifecycle) is specified in [runtime-layer.md](runtime-layer.md). The
 services architecture (hub, CLI, storage, protocols, deployment) is
 specified in [services-architecture.md](services-architecture.md). The spec
@@ -65,11 +65,11 @@ package** (coordination) and one or more attached **Contexts** (grounding). A
 Context lives above the workspace and is referenced by it, because a Context
 is reused across many workspaces. The spec package lives in the spec store,
 keyed by workspace, because it is per task; agents access it through the
-harness API, not as files in the worktree.
+harness API, not as files in the checkout.
 
 ```mermaid
 graph TD
-    W[Workspace] -->|owns| WT[Worktree / Branch]
+    W[Workspace] -->|owns| WT[Branch]
     W -->|owns| SP[Spec package]
     SP -->|contains| PRD[prd.md + frontmatter]
     SP -->|contains| REQ[requirements.json]
@@ -82,8 +82,8 @@ graph TD
 
 | Entity | One-line definition |
 | --- | --- |
-| Workspace | Isolated environment for one task: a worktree, a spec package, attached Contexts, agents, and an activity log. |
-| Worktree | A git working tree on a dedicated branch, giving each workspace its own files. |
+| Workspace | Isolated environment for one task: a branch, a spec package, attached Contexts, agents, and an activity log. Each workspace runs in its own sandbox with an independent repo checkout. |
+| Branch | A git branch dedicated to a workspace, checked out inside the sandbox at `/workspace`. |
 | Spec package | The validated set of four required artifacts (and one optional) that define and verify the work. Format details in [spec-format_v1.2.md](spec-format_v1.2.md). |
 | PRD (`prd.md`) | The human-authored narrative: intent, goals, non-goals, background, plus machine-read frontmatter and a hashed Intent section. |
 | Requirements (`requirements.json`) | EARS acceptance criteria, correctness properties, execution paths, and error handling. |
@@ -113,7 +113,7 @@ coordination medium; the Contexts are the grounding medium.
 
 A workspace is the unit of isolation and the unit of state. It bundles, for one task:
 
-- a git worktree on its own branch, which holds the files agents read and edit;
+- a dedicated git branch, checked out inside the sandbox at `/workspace`;
 - one active spec package stored in the spec store, accessible to agents only through the harness API (§5.5);
 - zero or more attached Contexts, each pinned to a fixed revision;
 - a registry of agents (active and finished) and their conversation histories;
@@ -122,13 +122,24 @@ A workspace is the unit of isolation and the unit of state. It bundles, for one 
 
 One workspace per real task. One workspace carries one spec package, and it attaches whichever Contexts describe the domain that task touches.
 
-### 3.2 Isolation through worktrees
+### 3.2 Isolation through sandboxes
 
-Isolation lets several workspaces run at once without stepping on each other. The harness implements it with `git worktree`. Creating a workspace creates a branch (named with a prefix, for example `af/add-dark-mode`) and a separate working directory checked out to that branch. The user's main branch and checkout are never touched.
+Isolation lets several workspaces run at once without stepping on each
+other. Creating a workspace creates a branch (named with a prefix, for
+example `af/add-dark-mode`). When a sandbox starts for that workspace, the
+runtime clones the repo inside the sandbox and checks out the branch.
+Each sandbox has its own independent clone — no shared filesystem or git
+state between workspaces. The user's main branch and checkout are never
+touched.
 
-A fresh worktree does not inherit untracked files. Environment files, local secrets, seeded data, and installed dependencies do not carry over. Workspace creation must run a bootstrap step (§3.4) before agents start.
+A fresh clone does not inherit untracked files. Environment files, local
+secrets, seeded data, and installed dependencies do not carry over.
+Workspace creation must run a bootstrap step (§3.4) before agents start.
 
-The spec package does not live in the worktree. It is stored in the spec store, keyed by workspace, and agents access it only through the harness API (§5.5). Spec artifacts never appear in the project's source tree or git history.
+The spec package does not live in the checkout. It is stored in the spec
+store, keyed by workspace, and agents access it only through the af SDK
+(§5.5). Spec artifacts never appear in the project's source tree or git
+history.
 
 ### 3.3 Workspace lifecycle
 
@@ -136,7 +147,7 @@ Distinct from the spec lifecycle (§5.3); a workspace contains a spec, and the t
 
 | State | Meaning | Transitions |
 | --- | --- | --- |
-| Created | Branch and worktree exist; bootstrap pending or deferred (campaign-gated, §4.5). | to Active on bootstrap success; to Failed on bootstrap error. |
+| Created | Branch exists; bootstrap pending or deferred (campaign-gated, §4.5). | to Active on bootstrap success; to Failed on bootstrap error. |
 | Failed | Bootstrap did not complete; no agents run. | to Created (retry); to Deleted. |
 | Active | Agents may run; the spec and files are live. | to Archived; to Deleted. |
 | Archived | Read-only; kept for reference, hidden from default listings. | to Active (reopen); to Deleted. |
@@ -148,13 +159,13 @@ Deletion removes the harness record and metadata. The git branch is left in plac
 
 ### 3.4 Bootstrap and setup scripts
 
-Each workspace carries setup commands that run when its worktree initializes, before any agent acts: install dependencies, copy a `.env`, run a seed script. The harness runs these in the worktree, captures output into the activity log, and only marks the workspace Active when they succeed.
+Each workspace carries setup commands that run when its sandbox initializes, before any agent acts: install dependencies, copy a `.env`, run a seed script. The harness runs these inside the sandbox's checkout, captures output into the activity log, and only marks the workspace Active when they succeed.
 
 ### 3.5 State surfaces
 
 The harness exposes the workspace's live state through read APIs:
 
-- file listing and file contents for the worktree;
+- file listing and file contents for the workspace checkout;
 - git status and per-file diffs;
 - the spec package: each artifact in raw JSON or markdown, and a rendered combined view;
 - computed coverage and traceability;
@@ -175,7 +186,7 @@ Every workspace is created and managed by the Operator. No agent creates, archiv
 - the **Contexts** to attach, with pin mode per Context (pinned by default);
 - optionally, a **Campaign** to register the workspace into.
 
-The harness provisions the branch and worktree, runs bootstrap, and transitions to `Active` on success. If registered into a Campaign with unsatisfied dependencies, bootstrap is deferred until the gate clears (§4.5).
+The harness provisions the branch, runs bootstrap inside the sandbox, and transitions to `Active` on success. If registered into a Campaign with unsatisfied dependencies, bootstrap is deferred until the gate clears (§4.5).
 
 **Management.** Archive, reopen, and delete are Operator actions. The harness does not auto-archive or auto-delete.
 
@@ -247,7 +258,7 @@ When a campaign is registered with the hub, the Operator may declare Contexts th
 
 ### 4.7 What a Campaign is not
 
-A Campaign is not a spec (no `requirements.json`, no freeze, no traceability). It is not a workspace (no worktree, no agents). It does not replace spec authoring: specs are still authored one at a time, either through the standalone `spec` tool or through the harness Planner (see §5).
+A Campaign is not a spec (no `requirements.json`, no freeze, no traceability). It is not a workspace (no branch, no agents). It does not replace spec authoring: specs are still authored one at a time, either through the standalone `spec` tool or through the harness Planner (see §5).
 
 ---
 
@@ -332,7 +343,7 @@ The Spec Format Specification permits mutating an `active` spec; this harness de
 
 ### 5.5 Spec access at runtime
 
-Agents do not read spec artifacts as files. The spec package lives in the spec store, outside the worktree, and agents access it through the harness API. This enforces the freeze structurally.
+Agents do not read spec artifacts as files. The spec package lives in the spec store, outside the workspace checkout, and agents access it through the af SDK. This enforces the freeze structurally.
 
 **Access gate.** Only specs in `active` status or later (`sealed`, `superseded`) are served by the harness API. Draft specs are invisible to the harness — they exist only on the filesystem and are accessible only through speclib (via `spec` or the Planner). This ensures agents never see an unapproved, unfrozen spec.
 
@@ -471,7 +482,7 @@ Each agent runs inside an OpenShell sandbox. The execution model differs
 by adapter tier, but the coordination layer sees the same behavior:
 
 - **Tier 1 (provider SDK):** The SDK runs its own tool loop. It reads and
-  writes files in the mounted worktree, executes shell commands, drives a
+  writes files in the workspace checkout, executes shell commands, drives a
   browser, and calls af SDK functions and external MCP tools according to
   its own reasoning.
 - **Tier 2 (generic adapter):** The af runtime runs the tool loop on
@@ -529,7 +540,7 @@ Instruction precedence: harness policy → actor-capability constraints → Cont
 
 | Tool | What it does | Notable constraint |
 | --- | --- | --- |
-| File read/write | Reads and edits files in the worktree. | Confined to the workspace worktree. Single agent has exclusive access. |
+| File read/write | Reads and edits files in the workspace checkout. | Confined to the sandbox's `/workspace`. Single agent has exclusive access. |
 | Exec / script | Runs a shell command; long-running ones become managed scripts. | Output streamed to the activity log. |
 | Browser control | Drives a headless browser over CDP. | For end-to-end UI verification. |
 | Context search | Searches retrieved sources in attached Contexts: `af_context_search(query, context_id?, source_id?, max_results?)`. Returns ranked chunks. | Read-only against pinned revisions. |
@@ -697,7 +708,7 @@ record Learning:
 
 Each workspace runs **one agent at a time**. The Coordinator reads the frozen spec, works through task groups and subtasks sequentially, implements each subtask, runs verification, and advances state. There is no parallel agent concurrency within a workspace, which eliminates the need for file claims or cross-agent coordination protocols.
 
-The agent has exclusive access to the worktree. It reads its assigned subtask and the requirements and test specs it traces to (via prompt assembly and the spec-read tool), implements the work, commits, and transitions the subtask state. When a subtask is complete, the agent moves to the next one.
+The agent has exclusive access to the workspace checkout. It reads its assigned subtask and the requirements and test specs it traces to (via prompt assembly and the spec-read tool), implements the work, commits, and transitions the subtask state. When a subtask is complete, the agent moves to the next one.
 
 ```mermaid
 sequenceDiagram
@@ -705,7 +716,7 @@ sequenceDiagram
     participant S as Spec package
     participant CX as Attached Contexts
     participant A as Agent
-    participant RT as Worktree + op store
+    participant RT as Checkout + op store
 
     H->>S: spec authored and approved
     H->>CX: attach Contexts, pin revisions
@@ -832,7 +843,7 @@ The harness persists state across three stores so a process restart resumes clea
 
 | Entity | Key fields | Notes |
 | --- | --- | --- |
-| Workspace | id, name, status, owner, origin, branch, worktree path, base branch, remote, campaign_slug, spec_slug, timestamps | The aggregate root. References the campaign and spec it executes against. `status` follows §3.3. |
+| Workspace | id, name, status, owner, origin, branch, base branch, remote, campaign_slug, spec_slug, timestamps | The aggregate root. References the campaign and spec it executes against. `status` follows §3.3. |
 | WorkspaceConfig | workspace id, setup scripts, default provider, default model | Per-workspace overrides (§3.6). |
 | Campaign | id, slug, name, status, shared Context ids, timestamps | Every spec belongs to a campaign. `campaign.yaml` on the filesystem carries the static metadata (§4.2); the operational store carries execution-time state. `status` is `active`, `complete`, or `abandoned` (§4.4). Shared Context ids are a hub-level configuration (§4.6). |
 | CampaignMember | campaign id, workspace id, spec_slug | Links a workspace to its campaign and spec. Dependency edges live in each spec's `tasks.json` (§4.3), not in this entity. |
@@ -885,7 +896,7 @@ The API is split by audience. **Operator-facing** operations are for the human c
 - Create: supply origin, owner, campaign and spec references, Contexts with pin mode.
 - Get, list (filterable by status, campaign, owner).
 - Archive, reopen, delete.
-- Read worktree: file listing, file contents, git status, diffs.
+- Read workspace files: file listing, file contents, git status, diffs.
 - Managed scripts: list, stop.
 
 **Campaign.**
@@ -948,7 +959,7 @@ These operations are exposed as tools during a run (§6.5). Each is scoped to th
 
 | Tool | Operations | Reference |
 | --- | --- | --- |
-| File read/write | Read and edit files. Single agent has exclusive worktree access. | §6.5 |
+| File read/write | Read and edit files. Single agent has exclusive checkout access. | §6.5 |
 | Exec / script | Run shell commands; long-running → managed scripts. | §6.5 |
 | Browser control | Drive a headless browser over CDP. | §6.5 |
 | Spec read | Fetch artifacts, rendered views, traceability, coverage. Read-only. | §5.5 |
@@ -973,7 +984,7 @@ Read-only; available to both the Operator and diagnostic tooling.
 
 ## 11. Non-functional requirements
 
-The harness streams agent output with low latency. Workspace operations do not block each other. Tool execution is sandboxed to the owning workspace's worktree. Every state-changing action lands in the activity log so runs are reproducible and auditable. Provider failures and tool errors surface as events. Long-running scripts are tracked and cleaned up on archive or delete.
+The harness streams agent output with low latency. Workspace operations do not block each other. Tool execution is sandboxed to the owning workspace's checkout. Every state-changing action lands in the activity log so runs are reproducible and auditable. Provider failures and tool errors surface as events. Long-running scripts are tracked and cleaned up on archive or delete.
 
 Schema validation is sub-millisecond. Authoring writes are atomic across files. Rendering is deterministic.
 
@@ -987,14 +998,14 @@ This document specifies the coordination layer. Three companion components compl
 
 - **[Spec Creation Tool](services-architecture.md#7-the-spec-creation-tool)** — speclib (shared library), the `spec` CLI, and the agent skill. Handles spec authoring independently of the harness. Writes to the spec store filesystem. The harness Planner uses speclib for the harness-mediated authoring path.
 
-- **[Runtime Layer](runtime-layer.md)** — sandbox isolation, worktree management, harness adapters per provider, agent lifecycle (phase and activity), templates, sidecar services, and the af SDK. The coordination layer drives the runtime through a narrow interface and never reaches past it.
+- **[Runtime Layer](runtime-layer.md)** — sandbox isolation, branch management, harness adapters per provider, agent lifecycle (phase and activity), templates, sidecar services, and the af SDK. The coordination layer drives the runtime through a narrow interface and never reaches past it.
 
 - **[Services Architecture](services-architecture.md)** — the af hub (single stateful process owning all three stores), CLI, storage layout (filesystem + SQLite), communication protocols (HTTP/JSON for CLI, gRPC for bridge), security and isolation, deployment modes, the retrieval engine, CI/CD bridge, notification service, and web dashboard.
 
 | Coordination layer owns | Runtime layer owns |
 | --- | --- |
 | Prompt assembly (what the agent is told) | Container lifecycle (how the agent runs) |
-| Spec store, Context store, operational store | Worktree provisioning and mounting |
+| Spec store, Context store, operational store | Branch provisioning and sandbox checkout |
 | Runs, subtask state, verification gates | Agent start/stop/suspend/resume |
 | Activity log (harness-level events) | Provider-level telemetry |
 | The af SDK tool logic | Sandbox, env, and credential isolation |
@@ -1009,7 +1020,7 @@ The af SDK is the integration point between the two layers: it is a library impo
 | Term | Meaning in this document |
 | --- | --- |
 | Campaign | The organizational unit for specs. Every spec belongs to a campaign. Owns a goal document, workspaces, a dependency graph, and orchestration state. Also the top-level directory in the spec store filesystem. |
-| Worktree | Git working tree on the workspace's dedicated branch. |
+| Workspace branch | A git branch dedicated to a workspace, checked out inside the sandbox at `/workspace`. |
 | Spec package | The validated four-artifact set (plus optional `architecture.md`). Format details in [spec-format_v1.2.md](spec-format_v1.2.md). |
 | PRD | `prd.md`: human-authored intent, goals, non-goals, with hashed Intent and frontmatter. |
 | Requirements | `requirements.json`: EARS criteria, correctness properties, execution paths, error handling. |
@@ -1038,7 +1049,7 @@ The af SDK is the integration point between the two layers: it is a library impo
 | Google ADK | Google's Agent Development Kit for building agents with Gemini models. Tier 1 adapter wraps this. |
 | LangGraph | LangChain's low-level orchestration runtime for stateful agents. Used by the generic adapter for durable execution, streaming, and checkpointing. |
 | LangChain chat models | Provider-specific model integrations (ChatOllama, ChatOpenAI, etc.) that handle API translation and tool-calling format differences. Used by the generic adapter for provider routing. |
-| Runtime layer | Infrastructure layer: sandboxes, worktrees, adapters, agent lifecycle. See [runtime-layer.md](runtime-layer.md). |
+| Runtime layer | Infrastructure layer: sandboxes, branches, adapters, agent lifecycle. See [runtime-layer.md](runtime-layer.md). |
 | OpenShell | NVIDIA's open-source sandbox runtime for agent isolation. See [runtime-layer.md §2.1](runtime-layer.md#21-openshell-adapter-default). |
 | Harness adapter | Runtime adapter integrating a provider into the af runtime. Two tiers: provider SDK (Tier 1) and generic (Tier 2). See [runtime-layer.md §4](runtime-layer.md#4-harness-adapters). |
 | Template | Blueprint for agent configuration. See [runtime-layer.md §6](runtime-layer.md#6-templates). |
