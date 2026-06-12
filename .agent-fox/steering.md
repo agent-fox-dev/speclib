@@ -1,16 +1,10 @@
-<!-- steering:placeholder -->
-<!--
-  Steering Directives
-  ===================
-  This file is read by every agent and skill working on this repository.
-  Add your directives below to influence agent behavior across all sessions.
+## On the techstack
 
-  Examples:
-    - "Always prefer composition over inheritance."
-    - "Never modify files under legacy/ without approval."
-    - "Use pytest parametrize for all new test cases."
+When planning an implementation or when working on specifications, assume the following set of technologies, unless instructed otherwise:
 
-  Remove this comment block and the placeholder marker above when you add
-  your first directive. Or simply add content below — the system ignores
-  this file when it contains only the placeholder marker and comments.
--->
+- Python 3.14+
+- [uv](https://docs.astral.sh/uv/)
+- go 1.26+
+- rust & cargo
+
+IMPORTANT: Do not use Javascript or Typescript if it can be avoided !
