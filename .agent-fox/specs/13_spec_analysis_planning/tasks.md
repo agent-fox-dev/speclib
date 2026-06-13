@@ -119,38 +119,38 @@ data models, spec parsing, and the planner entry point.
     - [x] No linter warnings: `uv run ruff check packages/coder/ && uv run mypy packages/coder/coder/`
     - [x] Requirements 1.1-6.2 met
 
-- [ ] 4. Wiring verification
+- [x] 4. Wiring verification
 
-  - [ ] 4.1 Trace every execution path from design.md end-to-end
+  - [x] 4.1 Trace every execution path from design.md end-to-end
     - Path 1: build_execution_plan → discover → parse → filter → sort → plan
     - Verify each function call is real (not stubbed)
     - _Requirements: all_
 
-  - [ ] 4.2 Verify return values propagate correctly
+  - [x] 4.2 Verify return values propagate correctly
     - `discover_specs()` → `list[SpecMeta]` consumed by parser
     - `SpecParser.parse()` → `ParsedSpec` consumed by planner
     - `build_execution_plan()` → `ExecutionPlan` consumed by caller
     - _Requirements: all_
 
-  - [ ] 4.3 Run the integration smoke tests
+  - [x] 4.3 Run the integration smoke tests
     - TS-13-SMOKE-1: Build plan from example specs (real filesystem)
     - _Test Spec: TS-13-SMOKE-1_
 
-  - [ ] 4.4 Stub / dead-code audit
+  - [x] 4.4 Stub / dead-code audit
     - Search `packages/coder/coder/planner.py` and `spec_parser.py` for
       stubs, TODOs, or dead code
     - _Requirements: all_
 
-  - [ ] 4.5 Cross-spec entry point verification
+  - [x] 4.5 Cross-spec entry point verification
     - Verify `build_execution_plan()` is callable from the CLI (spec 12)
     - Verify `ExecutionPlan` is importable by spec 14 code
     - _Requirements: all_
 
-  - [ ] 4.V Verify wiring group
-    - [ ] All smoke tests pass
-    - [ ] No unjustified stubs remain
-    - [ ] All execution paths from design.md are live
-    - [ ] All existing tests still pass: `uv run pytest -q packages/coder/tests/ -v`
+  - [x] 4.V Verify wiring group
+    - [x] All smoke tests pass
+    - [x] No unjustified stubs remain
+    - [x] All execution paths from design.md are live
+    - [x] All existing tests still pass: `uv run pytest -q packages/coder/tests/ -v`
 
 ## Traceability
 

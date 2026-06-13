@@ -13,6 +13,7 @@ from coder.errors import (
 )
 from coder.logging import get_logger, setup_logging
 from coder.models import ExecutionPlan, ParsedSpec
+from coder.planner import build_execution_plan
 
 __all__ = [
     # Config
@@ -24,6 +25,8 @@ __all__ = [
     # Models
     "ParsedSpec",
     "ExecutionPlan",
+    # Planner
+    "build_execution_plan",
     # Exceptions
     "CoderError",
     "ConfigError",
