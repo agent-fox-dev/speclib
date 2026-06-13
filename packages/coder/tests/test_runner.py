@@ -41,10 +41,10 @@ def _make_parsed_spec(
     groups = [
         {
             "id": i,
-            "kind": "implementation",
+            "kind": "standard",
             "title": f"Group {i}",
             "subtasks": [],
-            "verification": [],
+            "verification": {},
         }
         for i in range(1, n_groups + 1)
     ]

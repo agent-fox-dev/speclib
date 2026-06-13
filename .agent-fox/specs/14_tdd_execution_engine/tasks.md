@@ -114,7 +114,7 @@ tests. This is the largest spec with 7 task groups.
     - [x] No linter warnings: `uv run ruff check packages/coder/ && uv run mypy packages/coder/coder/`
     - [x] Requirements 6.1-6.4, 8.1-8.3 met
 
-- [ ] 4. Checkpoint — Tools & Infrastructure Complete
+- [x] 4. Checkpoint — Tools & Infrastructure Complete
   - Ensure all tests pass. All infrastructure modules (state, tools, verify)
     are working. Ask the user if questions arise.
 
