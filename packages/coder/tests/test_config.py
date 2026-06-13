@@ -17,6 +17,7 @@ from coder.config import CoderConfig, load_config
 from coder.errors import ConfigError
 from hypothesis import given, settings
 from hypothesis import strategies as st
+from pydantic import ValidationError
 
 
 class TestPackageStructure:
@@ -38,7 +39,8 @@ class TestPackageStructure:
         Requirement: 12-REQ-1.2
         Verifies pyproject.toml lists required dependencies.
         """
-        pyproject_path = Path(__file__).parents[2] / "pyproject.toml"
+        # parents[1] = packages/coder/ (the coder package root)
+        pyproject_path = Path(__file__).parents[1] / "pyproject.toml"
         with open(pyproject_path, "rb") as f:
             toml = tomllib.load(f)
 
@@ -64,6 +66,7 @@ class TestPackageStructure:
         workspace member (either explicitly or via glob pattern).
         """
         # Traverse from packages/coder/tests/ up to root
+        # parents[3] = repo root (tests → coder → packages → root)
         root = Path(__file__).parents[3]
         pyproject_path = root / "pyproject.toml"
         with open(pyproject_path, "rb") as f:
@@ -84,7 +87,8 @@ class TestPackageStructure:
         not contain multiple entries that resolve to the same package.
         """
         # Check the coder package pyproject.toml is well-formed
-        pyproject_path = Path(__file__).parents[2] / "pyproject.toml"
+        # parents[1] = packages/coder/ (the coder package root)
+        pyproject_path = Path(__file__).parents[1] / "pyproject.toml"
         with open(pyproject_path, "rb") as f:
             toml = tomllib.load(f)
 
@@ -92,6 +96,7 @@ class TestPackageStructure:
 
         # Check root workspace has no duplicate entries that resolve
         # to packages/coder
+        # parents[3] = repo root (tests → coder → packages → root)
         root = Path(__file__).parents[3]
         root_pyproject_path = root / "pyproject.toml"
         with open(root_pyproject_path, "rb") as f:
@@ -205,7 +210,9 @@ class TestConfigLoading:
         """
         config = load_config(project_dir=tmp_project_dir)
         assert isinstance(config, CoderConfig)
-        with pytest.raises((TypeError, AttributeError)):
+        with pytest.raises(
+            (TypeError, AttributeError, ValidationError)
+        ):
             config.model = "other-model"  # type: ignore[misc]
 
 

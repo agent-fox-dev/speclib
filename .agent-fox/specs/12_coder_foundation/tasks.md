@@ -98,15 +98,15 @@ Subsequent groups implement modules to make those tests pass.
     - [x] All spec tests FAIL (red) — no implementation yet
     - [x] No linter warnings: `uv run ruff check packages/coder/tests/`
 
-- [ ] 2. Package scaffolding & configuration
-  - [ ] 2.1 Create package structure
+- [x] 2. Package scaffolding & configuration
+  - [x] 2.1 Create package structure
     - Create `packages/coder/pyproject.toml` with all dependencies
     - Create `packages/coder/coder/__init__.py` with version and exports
     - Update root `pyproject.toml` to include coder as workspace member
     - Run `uv sync` to verify workspace integration
     - _Requirements: 1.1, 1.2, 1.3_
 
-  - [ ] 2.2 Implement configuration system
+  - [x] 2.2 Implement configuration system
     - Create `packages/coder/coder/config.py`
     - Implement `CoderConfig` pydantic model with all fields
     - Implement `load_config()` with YAML loading, env var overrides,
@@ -114,14 +114,14 @@ Subsequent groups implement modules to make those tests pass.
     - Implement unknown-key warning
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
 
-  - [ ] 2.3 Implement custom exceptions
+  - [x] 2.3 Implement custom exceptions
     - Create `packages/coder/coder/errors.py`
     - Define: `ConfigError`, `ProviderConfigError`,
       `ProviderConnectionError`, `TemplateNotFoundError`,
       `TemplateSecurityError`
     - _Requirements: 2.E1, 2.E2, 4.E3, 5.E1, 5.5_
 
-  - [ ] 2.4 Implement structured logging
+  - [x] 2.4 Implement structured logging
     - Create `packages/coder/coder/logging.py`
     - Implement `setup_logging(config)` with structlog + rich
     - Implement `get_logger(name)` function
@@ -129,13 +129,13 @@ Subsequent groups implement modules to make those tests pass.
     - Optional file sink
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5_
 
-  - [ ] 2.V Verify task group 2
-    - [ ] Spec tests pass: TS-12-1, TS-12-2, TS-12-10, TS-12-11, TS-12-19
-    - [ ] Edge case tests pass: TS-12-E3, TS-12-E4, TS-12-E7
-    - [ ] Property tests pass: TS-12-P2
-    - [ ] All existing tests still pass: `uv run pytest -q packages/coder/tests/ -v`
-    - [ ] No linter warnings: `uv run ruff check packages/coder/ && uv run mypy packages/coder/coder/`
-    - [ ] Requirements 1.1, 1.2, 1.3, 4.1-4.5, 8.1-8.5 met
+  - [x] 2.V Verify task group 2
+    - [x] Spec tests pass: TS-12-1, TS-12-2, TS-12-10, TS-12-11, TS-12-19
+    - [x] Edge case tests pass: TS-12-E3, TS-12-E4, TS-12-E7
+    - [x] Property tests pass: TS-12-P2
+    - [x] All existing tests still pass: `uv run pytest -q packages/coder/tests/ -v`
+    - [x] No linter warnings: `uv run ruff check packages/coder/ && uv run mypy packages/coder/coder/`
+    - [x] Requirements 1.1, 1.2, 1.3, 4.1-4.5, 8.1-8.5 met
 
 - [ ] 3. LLM providers & registry
   - [ ] 3.1 Implement LLMProvider interface and providers
