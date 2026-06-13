@@ -21,12 +21,40 @@ from typing import Any
 
 from langchain_core.messages import HumanMessage, SystemMessage
 
+_STATE_DEFAULTS: dict[str, Any] = {
+    "attempt_count": 0,
+    "max_attempts": 5,
+    "halted": False,
+    "halt_reason": "",
+    "spec_context": "",
+    "codebase_analysis": "",
+    "test_results": "",
+    "coverage_ok": False,
+    "drift_detected": False,
+    "current_task_group": 1,
+    "current_phase": "understand_spec",
+}
+"""Sensible defaults for all standard CoderState fields (14-REQ-1.E1)."""
+
 
 def _get_state_default(
     state: dict[str, Any], key: str, default: Any
 ) -> Any:
     """Get a value from state with a sensible default (14-REQ-1.E1)."""
     return state.get(key, default)
+
+
+def _with_defaults(state: dict[str, Any]) -> dict[str, Any]:
+    """Return a copy of *state* with missing fields filled from defaults.
+
+    Ensures that every node returns a state dictionary containing all
+    standard fields, even if the input state was incomplete (14-REQ-1.E1).
+    """
+    result = dict(state)
+    for key, default in _STATE_DEFAULTS.items():
+        if key not in result:
+            result[key] = default
+    return result
 
 
 def understand_spec(
@@ -39,7 +67,7 @@ def understand_spec(
     if _get_state_default(state, "halted", False):
         return state
 
-    new_state = dict(state)
+    new_state = _with_defaults(state)
     messages = [
         SystemMessage(content="You are a spec analyst."),
         HumanMessage(
@@ -72,7 +100,7 @@ def analyze_codebase(
     if _get_state_default(state, "halted", False):
         return state
 
-    new_state = dict(state)
+    new_state = _with_defaults(state)
     messages = [
         SystemMessage(content="You are a codebase analyst."),
         HumanMessage(
@@ -105,7 +133,7 @@ def write_tests(
     if _get_state_default(state, "halted", False):
         return state
 
-    new_state = dict(state)
+    new_state = _with_defaults(state)
     group = _get_state_default(state, "current_task_group", 1)
     messages = [
         SystemMessage(content="You are a test writer."),
@@ -139,7 +167,7 @@ def verify_test_coverage(
     if _get_state_default(state, "halted", False):
         return state
 
-    new_state = dict(state)
+    new_state = _with_defaults(state)
     messages = [
         SystemMessage(content="You are a test coverage reviewer."),
         HumanMessage(
@@ -173,7 +201,7 @@ def implement(
     if _get_state_default(state, "halted", False):
         return state
 
-    new_state = dict(state)
+    new_state = _with_defaults(state)
     messages = [
         SystemMessage(content="You are an expert coder."),
         HumanMessage(
@@ -214,7 +242,7 @@ def run_tests(
     if _get_state_default(state, "halted", False):
         return state
 
-    new_state = dict(state)
+    new_state = _with_defaults(state)
     result = runner.run()
     new_state["test_results"] = "PASS" if result.passed else "FAIL"
     new_state["current_phase"] = "verify_intent" if result.passed else "implement"
@@ -231,7 +259,7 @@ def verify_intent(
     if _get_state_default(state, "halted", False):
         return state
 
-    new_state = dict(state)
+    new_state = _with_defaults(state)
     messages = [
         SystemMessage(content="You are a code reviewer."),
         HumanMessage(
@@ -264,7 +292,7 @@ def next_task_group(state: dict[str, Any]) -> dict[str, Any]:
     Per 14-REQ-7.3, increments ``current_task_group`` and resets
     ``attempt_count`` to 0.
     """
-    new_state = dict(state)
+    new_state = _with_defaults(state)
     new_state["current_task_group"] = (
         _get_state_default(state, "current_task_group", 1) + 1
     )

@@ -91,8 +91,8 @@ tests. This is the largest spec with 7 task groups.
     - [x] No linter warnings: `uv run ruff check packages/coder/ && uv run mypy packages/coder/coder/`
     - [x] Requirements 1.1, 1.2, 4.1-4.5 met
 
-- [ ] 3. Verification runner & run state
-  - [ ] 3.1 Implement VerificationRunner
+- [x] 3. Verification runner & run state
+  - [x] 3.1 Implement VerificationRunner
     - Create `packages/coder/coder/verify.py`
     - Implement `run()` method executing test commands
     - Capture stdout, stderr, exit code
@@ -100,19 +100,19 @@ tests. This is the largest spec with 7 task groups.
     - Handle empty/missing commands
     - _Requirements: 6.1, 6.2, 6.3, 6.4_
 
-  - [ ] 3.2 Implement run state persistence
+  - [x] 3.2 Implement run state persistence
     - Create `packages/coder/coder/state.py`
     - Implement `persist_state()` with atomic write (temp + rename)
     - Implement `StateTransition` record and history tracking
     - _Requirements: 8.1, 8.2, 8.3_
 
-  - [ ] 3.V Verify task group 3
-    - [ ] Spec tests pass: TS-14-19, TS-14-20, TS-14-22, TS-14-23
-    - [ ] Edge case tests pass: TS-14-E6
+  - [x] 3.V Verify task group 3
+    - [x] Spec tests pass: TS-14-19, TS-14-20, TS-14-22, TS-14-23
+    - [x] Edge case tests pass: TS-14-E6
     - [ ] Property tests pass: TS-14-P4
-    - [ ] All existing tests still pass: `uv run pytest -q packages/coder/tests/ -v`
-    - [ ] No linter warnings: `uv run ruff check packages/coder/ && uv run mypy packages/coder/coder/`
-    - [ ] Requirements 6.1-6.4, 8.1-8.3 met
+    - [x] All existing tests still pass: `uv run pytest -q packages/coder/tests/ -v`
+    - [x] No linter warnings: `uv run ruff check packages/coder/ && uv run mypy packages/coder/coder/`
+    - [x] Requirements 6.1-6.4, 8.1-8.3 met
 
 - [ ] 4. Checkpoint — Tools & Infrastructure Complete
   - Ensure all tests pass. All infrastructure modules (state, tools, verify)

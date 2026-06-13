@@ -78,8 +78,11 @@ def persist_state(
         fd, tmp_path = tempfile.mkstemp(
             dir=str(worktree_path), suffix=".tmp"
         )
+        # Close the low-level fd immediately; we re-open via builtins.open
+        # so that standard Python I/O (and test mocks) can intercept writes.
+        os.close(fd)
         try:
-            with os.fdopen(fd, "w") as f:
+            with open(tmp_path, "w") as f:  # noqa: SIM115
                 json.dump(serializable_state, f, indent=2)
             os.rename(tmp_path, str(run_json_path))
         except BaseException:
