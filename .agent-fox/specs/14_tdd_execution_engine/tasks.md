@@ -67,14 +67,14 @@ tests. This is the largest spec with 7 task groups.
     - [x] All spec tests FAIL (red) — no implementation yet
     - [x] No linter warnings: `uv run ruff check packages/coder/tests/`
 
-- [ ] 2. State schema & LangChain tools
-  - [ ] 2.1 Define CoderState TypedDict
+- [x] 2. State schema & LangChain tools
+  - [x] 2.1 Define CoderState TypedDict
     - Create/update `packages/coder/coder/graph.py` with `CoderState`
     - Define all fields with types and defaults
     - Implement `create_initial_state(parsed_spec)` factory
     - _Requirements: 1.1, 1.2_
 
-  - [ ] 2.2 Implement coding tools
+  - [x] 2.2 Implement coding tools
     - Create `packages/coder/coder/tools.py`
     - Implement `read_file` tool with path validation
     - Implement `write_file` tool with parent dir creation and symlink check
@@ -83,13 +83,13 @@ tests. This is the largest spec with 7 task groups.
     - All tools resolve paths relative to a worktree root
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
 
-  - [ ] 2.V Verify task group 2
-    - [ ] Spec tests pass: TS-14-1, TS-14-13 through TS-14-16
-    - [ ] Edge case tests pass: TS-14-E3, TS-14-E4
-    - [ ] Property tests pass: TS-14-P3
-    - [ ] All existing tests still pass: `uv run pytest -q packages/coder/tests/ -v`
-    - [ ] No linter warnings: `uv run ruff check packages/coder/ && uv run mypy packages/coder/coder/`
-    - [ ] Requirements 1.1, 1.2, 4.1-4.5 met
+  - [x] 2.V Verify task group 2
+    - [x] Spec tests pass: TS-14-1, TS-14-13 through TS-14-16
+    - [x] Edge case tests pass: TS-14-E3, TS-14-E4
+    - [x] Property tests pass: TS-14-P3
+    - [x] All existing tests still pass: `uv run pytest -q packages/coder/tests/ -v`
+    - [x] No linter warnings: `uv run ruff check packages/coder/ && uv run mypy packages/coder/coder/`
+    - [x] Requirements 1.1, 1.2, 4.1-4.5 met
 
 - [ ] 3. Verification runner & run state
   - [ ] 3.1 Implement VerificationRunner
