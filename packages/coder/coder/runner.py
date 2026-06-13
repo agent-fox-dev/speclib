@@ -7,7 +7,9 @@ Implements Requirements:
     14-REQ-9.1 (run_spec), 14-REQ-9.2 (RunResult),
     14-REQ-9.3 (run_campaign), 14-REQ-9.E1 (exception handling),
     14-REQ-7.1 (task group iteration), 14-REQ-7.2 (commit format),
-    14-REQ-7.3 (task group advance), 14-REQ-7.4 (complete phase).
+    14-REQ-7.3 (task group advance), 14-REQ-7.4 (complete phase),
+    14-REQ-5.1 (worktree creation), 14-REQ-5.3 (worktree merge),
+    14-REQ-5.4 (worktree cleanup).
 """
 
 from __future__ import annotations
@@ -22,6 +24,12 @@ from coder.graph import build_graph, create_initial_state
 from coder.models import ExecutionPlan, ParsedSpec
 from coder.state import persist_state
 from coder.tools import create_coding_tools
+from coder.worktree import (
+    cleanup_worktree,
+    commit_task_group,
+    create_worktree,
+    merge_worktree,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -144,10 +152,11 @@ def run_campaign(
 ) -> list[RunResult]:
     """Iterate over specs in plan order, running each and collecting results.
 
-    For each spec: creates a worktree, runs ``run_spec``, merges on
-    success, and cleans up. Catches per-spec exceptions so that a
-    failure in one spec does not prevent execution of subsequent specs
-    (14-REQ-9.E1).
+    For each spec: creates a worktree (14-REQ-5.1), runs ``run_spec``
+    within the worktree (14-REQ-5.2), commits on success (14-REQ-7.2),
+    merges the worktree branch back (14-REQ-5.3), and cleans up
+    (14-REQ-5.4). Catches per-spec exceptions so that a failure in one
+    spec does not prevent execution of subsequent specs (14-REQ-9.E1).
 
     Parameters
     ----------
@@ -165,14 +174,32 @@ def run_campaign(
     A list of :class:`RunResult` objects, one per spec.
     """
     results: list[RunResult] = []
+    model_name = getattr(provider, "model_name", "unknown")
 
     for spec in plan.specs:
         start_time = time.monotonic()
         total_groups = len(spec.tasks.task_groups) or 1
+        wt = None
 
         try:
-            result = run_spec(spec, provider, repo_path, config)
+            # Create isolated worktree for this spec (14-REQ-5.1)
+            wt = create_worktree(
+                repo_path, spec.meta.spec_name, model_name,
+            )
+
+            # Execute spec in the worktree (14-REQ-5.2)
+            result = run_spec(spec, provider, wt.path, config)
             results.append(result)
+
+            if result.success:
+                # Commit task group completion (14-REQ-7.2)
+                commit_task_group(
+                    wt,
+                    result.task_groups_completed,
+                    spec.meta.spec_name,
+                )
+                # Merge worktree branch back to source (14-REQ-5.3)
+                merge_worktree(wt)
         except Exception as exc:
             elapsed = time.monotonic() - start_time
             logger.error(
@@ -191,5 +218,16 @@ def run_campaign(
                     halt_reason=f"Error: {exc}",
                 )
             )
+        finally:
+            # Clean up worktree regardless of outcome (14-REQ-5.4)
+            if wt is not None:
+                try:
+                    cleanup_worktree(wt)
+                except Exception as cleanup_exc:
+                    logger.warning(
+                        "Failed to clean up worktree for %s: %s",
+                        spec.meta.spec_name,
+                        cleanup_exc,
+                    )
 
     return results

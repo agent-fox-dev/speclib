@@ -193,16 +193,16 @@ tests. This is the largest spec with 7 task groups.
     - [x] No linter warnings: `uv run ruff check packages/coder/ && uv run mypy packages/coder/coder/`
     - [x] Requirements 5.1-5.5, 7.1-7.4, 9.1-9.3 met
 
-- [ ] 7. Wiring verification
+- [x] 7. Wiring verification
 
-  - [ ] 7.1 Trace every execution path from design.md end-to-end
+  - [x] 7.1 Trace every execution path from design.md end-to-end
     - Path 1: run_spec → build_graph → invoke → all nodes → RunResult
     - Path 2: create_worktree → run_spec → commit → merge → cleanup
     - Path 3: run_campaign → loop(create_worktree → run_spec → merge)
     - Verify each function in the chain is called
     - _Requirements: all_
 
-  - [ ] 7.2 Verify return values propagate correctly
+  - [x] 7.2 Verify return values propagate correctly
     - `build_graph()` → `CompiledGraph` used by `run_spec`
     - Node functions → updated `CoderState` consumed by next node
     - `VerificationRunner.run()` → `VerificationResult` consumed by
@@ -210,28 +210,28 @@ tests. This is the largest spec with 7 task groups.
     - `run_spec()` → `RunResult` consumed by `run_campaign`
     - _Requirements: all_
 
-  - [ ] 7.3 Run the integration smoke tests
+  - [x] 7.3 Run the integration smoke tests
     - TS-14-SMOKE-1: Full graph execution with mock LLM
     - TS-14-SMOKE-2: Worktree lifecycle end-to-end
     - TS-14-SMOKE-3: Campaign runs multiple specs
     - _Test Spec: TS-14-SMOKE-1 through TS-14-SMOKE-3_
 
-  - [ ] 7.4 Stub / dead-code audit
+  - [x] 7.4 Stub / dead-code audit
     - Search all files in `packages/coder/coder/` for stubs, TODOs
     - Focus on: graph.py, nodes.py, tools.py, worktree.py, runner.py
     - _Requirements: all_
 
-  - [ ] 7.5 Cross-spec entry point verification
+  - [x] 7.5 Cross-spec entry point verification
     - Verify `run_campaign()` is called from CLI (spec 12)
     - Verify spec 15 can access `CoderState` and graph structure
     - _Requirements: all_
 
-  - [ ] 7.V Verify wiring group
-    - [ ] All smoke tests pass
-    - [ ] No unjustified stubs remain
-    - [ ] All execution paths from design.md are live
-    - [ ] All cross-spec entry points are called from production code
-    - [ ] All existing tests still pass: `uv run pytest -q packages/coder/tests/ -v`
+  - [x] 7.V Verify wiring group
+    - [x] All smoke tests pass
+    - [x] No unjustified stubs remain
+    - [x] All execution paths from design.md are live
+    - [x] All cross-spec entry points are called from production code
+    - [x] All existing tests still pass: `uv run pytest -q packages/coder/tests/ -v`
 
 ## Traceability
 

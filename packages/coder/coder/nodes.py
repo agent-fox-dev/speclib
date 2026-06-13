@@ -10,9 +10,6 @@ Implements Requirements:
     14-REQ-2.E1 (empty response retry),
     14-REQ-3.E1 (halted passthrough),
     14-REQ-7.3 (task group advance).
-
-Note: Full implementation provided in task group 5.
-      Stubs provided here for import compatibility.
 """
 
 from __future__ import annotations
