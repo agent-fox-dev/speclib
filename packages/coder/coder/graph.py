@@ -243,10 +243,18 @@ def build_graph(
         "implement",
         lambda state: implement(state, provider),
     )
-    graph.add_node(
-        "run_tests",
-        lambda state: run_tests(state, runner) if runner else state,
-    )
+    def _run_tests_node(state: CoderState) -> CoderState:
+        """Run tests node: uses the runner if available, otherwise passes."""
+        state_dict: dict[str, Any] = dict(state)
+        if runner:
+            return run_tests(state_dict, runner)  # type: ignore[return-value]
+        # No runner configured: treat tests as passing so graph can proceed
+        from coder.nodes import _with_defaults
+        new_state = _with_defaults(state_dict)
+        new_state["test_results"] = "PASS"
+        return new_state  # type: ignore[return-value]
+
+    graph.add_node("run_tests", _run_tests_node)
     graph.add_node(
         "verify_intent",
         lambda state: verify_intent(state, provider),

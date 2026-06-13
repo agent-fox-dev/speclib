@@ -158,8 +158,8 @@ tests. This is the largest spec with 7 task groups.
     - [x] No linter warnings: `uv run ruff check packages/coder/ && uv run mypy packages/coder/coder/`
     - [x] Requirements 2.1-2.7, 3.1-3.6 met
 
-- [ ] 6. Worktree, git, & runner entry points
-  - [ ] 6.1 Implement worktree lifecycle
+- [x] 6. Worktree, git, & runner entry points
+  - [x] 6.1 Implement worktree lifecycle
     - Create `packages/coder/coder/worktree.py`
     - Implement `create_worktree()` with branch naming
     - Implement `merge_worktree()` with fast-forward merge
@@ -168,7 +168,7 @@ tests. This is the largest spec with 7 task groups.
     - Handle stale worktree cleanup
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
 
-  - [ ] 6.2 Implement runner entry points
+  - [x] 6.2 Implement runner entry points
     - Create `packages/coder/coder/runner.py`
     - Implement `run_spec()`: build graph → init state → execute → return result
     - Implement `run_campaign()`: iterate plan → create worktree → run_spec
@@ -178,20 +178,20 @@ tests. This is the largest spec with 7 task groups.
     - Handle per-spec exception catching in campaign
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 9.1, 9.2, 9.3_
 
-  - [ ] 6.3 Wire CLI to runner
+  - [x] 6.3 Wire CLI to runner
     - Update `packages/coder/coder/cli.py` to call `build_execution_plan`
       then `run_campaign`
     - Pass provider, config, and repo path through
     - Print run results summary
     - _Requirements: (cross-spec wiring)_
 
-  - [ ] 6.V Verify task group 6
-    - [ ] Spec tests pass: TS-14-17, TS-14-18, TS-14-21, TS-14-24, TS-14-25
-    - [ ] Edge case tests pass: TS-14-E5, TS-14-E7
-    - [ ] Smoke tests pass: TS-14-SMOKE-1, TS-14-SMOKE-2, TS-14-SMOKE-3
-    - [ ] All existing tests still pass: `uv run pytest -q packages/coder/tests/ -v`
-    - [ ] No linter warnings: `uv run ruff check packages/coder/ && uv run mypy packages/coder/coder/`
-    - [ ] Requirements 5.1-5.5, 7.1-7.4, 9.1-9.3 met
+  - [x] 6.V Verify task group 6
+    - [x] Spec tests pass: TS-14-17, TS-14-18, TS-14-21, TS-14-24, TS-14-25
+    - [x] Edge case tests pass: TS-14-E5, TS-14-E7
+    - [x] Smoke tests pass: TS-14-SMOKE-1, TS-14-SMOKE-2, TS-14-SMOKE-3
+    - [x] All existing tests still pass: `uv run pytest -q packages/coder/tests/ -v`
+    - [x] No linter warnings: `uv run ruff check packages/coder/ && uv run mypy packages/coder/coder/`
+    - [x] Requirements 5.1-5.5, 7.1-7.4, 9.1-9.3 met
 
 - [ ] 7. Wiring verification
 

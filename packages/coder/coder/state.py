@@ -62,7 +62,8 @@ def persist_state(
     """
     run_json_path = worktree_path / "_run.json"
 
-    # Serialize history entries if they are StateTransition objects
+    # Serialize history entries if they are StateTransition objects,
+    # and convert non-serializable values to strings.
     serializable_state: dict[str, Any] = {}
     for key, value in state.items():
         if key == "history" and isinstance(value, list):
@@ -70,8 +71,18 @@ def persist_state(
                 asdict(t) if isinstance(t, StateTransition) else t
                 for t in value
             ]
-        else:
+        elif key == "messages":
+            # Messages may contain LangChain objects; store as strings
+            serializable_state[key] = [
+                str(m) for m in (value if isinstance(value, list) else [])
+            ]
+        elif isinstance(value, (str, int, float, bool, type(None))):
             serializable_state[key] = value
+        elif isinstance(value, (list, dict)):
+            serializable_state[key] = value
+        else:
+            # Fallback: convert non-serializable values to strings
+            serializable_state[key] = str(value)
 
     try:
         # Write to temp file, then atomic rename (14-REQ-8.3)

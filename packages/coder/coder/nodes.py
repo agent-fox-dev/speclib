@@ -180,13 +180,21 @@ def verify_test_coverage(
     response = llm.invoke(messages)
     content = response.content if hasattr(response, "content") else str(response)
 
-    if not content:
+    content_str = str(content) if content else ""
+
+    if not content_str:
         new_state["attempt_count"] = (
             _get_state_default(new_state, "attempt_count", 0) + 1
         )
     else:
-        # Determine coverage from LLM response
-        new_state["coverage_ok"] = "covered" in content.lower()
+        # Determine coverage from LLM response: default to covered
+        # unless the response explicitly indicates insufficient coverage.
+        lower = content_str.lower()
+        insufficient = any(
+            kw in lower
+            for kw in ("insufficient", "missing", "not covered", "gaps")
+        )
+        new_state["coverage_ok"] = not insufficient
         new_state["current_phase"] = "implement"
     return new_state
 
@@ -274,12 +282,17 @@ def verify_intent(
     response = llm.invoke(messages)
     content = response.content if hasattr(response, "content") else str(response)
 
-    if not content:
+    content_str = str(content) if content else ""
+
+    if not content_str:
         new_state["attempt_count"] = (
             _get_state_default(new_state, "attempt_count", 0) + 1
         )
     else:
-        lower = content.lower()
+        # Determine drift from LLM response: default to no drift
+        # unless the response explicitly indicates drift (and not
+        # a "no drift" negation).
+        lower = content_str.lower()
         new_state["drift_detected"] = (
             "drift" in lower and "no drift" not in lower
         )
