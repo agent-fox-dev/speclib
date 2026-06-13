@@ -60,8 +60,8 @@ spec 14, and adds console logging and post-mortem/summary generation.
     - [x] All spec tests FAIL (red) — no implementation yet
     - [x] No linter warnings: `uv run ruff check packages/coder/tests/`
 
-- [ ] 2. Safety config & circuit breaker
-  - [ ] 2.1 Extend configuration with SafetyConfig
+- [x] 2. Safety config & circuit breaker
+  - [x] 2.1 Extend configuration with SafetyConfig
     - Update `packages/coder/coder/config.py`
     - Add `SafetyConfig` pydantic model with defaults
     - Add `safety` field to `CoderConfig`
@@ -70,20 +70,20 @@ spec 14, and adds console logging and post-mortem/summary generation.
       `CODER_MAX_TOKENS`
     - _Requirements: 7.1, 7.2, 7.3_
 
-  - [ ] 2.2 Implement CircuitBreaker
+  - [x] 2.2 Implement CircuitBreaker
     - Create `packages/coder/coder/circuit.py`
     - Implement `check()` method checking attempt, time, and token limits
     - Validate limits at construction (reject zero/negative)
     - Handle null limits as unlimited
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
 
-  - [ ] 2.V Verify task group 2
-    - [ ] Spec tests pass: TS-15-1 through TS-15-4, TS-15-15
-    - [ ] Edge case tests pass: TS-15-E1, TS-15-E2
-    - [ ] Property tests pass: TS-15-P4
-    - [ ] All existing tests still pass: `uv run pytest -q packages/coder/tests/ -v`
-    - [ ] No linter warnings: `uv run ruff check packages/coder/ && uv run mypy packages/coder/coder/`
-    - [ ] Requirements 1.1-1.5, 7.1-7.3 met
+  - [x] 2.V Verify task group 2
+    - [x] Spec tests pass: TS-15-1 through TS-15-4, TS-15-15
+    - [x] Edge case tests pass: TS-15-E1, TS-15-E2
+    - [x] Property tests pass: TS-15-P4
+    - [x] All existing tests still pass: `uv run pytest -q packages/coder/tests/ -v`
+    - [x] No linter warnings: `uv run ruff check packages/coder/ && uv run mypy packages/coder/coder/`
+    - [x] Requirements 1.1-1.5, 7.1-7.3 met
 
 - [ ] 3. Token tracking & console logging
   - [ ] 3.1 Implement TokenTracker

@@ -31,10 +31,34 @@ _ENV_VAR_MAP: dict[str, str] = {
     "log_file": "CODER_LOG_FILE",
 }
 
+# Mapping from SafetyConfig field names to CODER_* env var names
+_SAFETY_ENV_VAR_MAP: dict[str, str] = {
+    "max_attempts_per_task": "CODER_MAX_ATTEMPTS",
+    "max_wall_time_seconds": "CODER_MAX_TIME",
+    "max_tokens": "CODER_MAX_TOKENS",
+}
+
 # Known configuration keys (field names of CoderConfig)
 _KNOWN_KEYS: frozenset[str] = frozenset(
-    _ENV_VAR_MAP.keys()
+    _ENV_VAR_MAP.keys() | {"safety"}
 )
+
+
+class SafetyConfig(BaseModel, frozen=True):
+    """Safety limits configuration for the circuit breaker.
+
+    Controls when the agent execution should be automatically halted
+    to prevent runaway loops. A ``None`` value means the corresponding
+    limit is not enforced (unlimited).
+
+    Implements Requirements:
+        15-REQ-7.1 (safety section in .coder.yaml),
+        15-REQ-7.2 (nested SafetyConfig model).
+    """
+
+    max_attempts_per_task: int | None = 5
+    max_wall_time_seconds: int | None = 1800
+    max_tokens: int | None = 2_000_000
 
 
 class CoderConfig(BaseModel, frozen=True):
@@ -49,6 +73,7 @@ class CoderConfig(BaseModel, frozen=True):
     ollama_url: str = "http://localhost:11434"
     log_level: str = "DEBUG"
     log_file: str | None = None
+    safety: SafetyConfig = SafetyConfig()
 
 
 def _load_yaml_file(path: Path) -> dict[str, object]:
@@ -163,5 +188,21 @@ def load_config(
         env_value = os.environ.get(env_var)
         if env_value is not None:
             merged[field_name] = env_value
+
+    # Handle nested safety configuration.
+    # Build a SafetyConfig from YAML safety section + env var overrides.
+    safety_data: dict[str, object] = {}
+    raw_safety = merged.pop("safety", None)
+    if isinstance(raw_safety, dict):
+        safety_data.update(raw_safety)
+
+    # Safety env var overrides
+    for field_name, env_var in _SAFETY_ENV_VAR_MAP.items():
+        env_value = os.environ.get(env_var)
+        if env_value is not None:
+            safety_data[field_name] = int(env_value)
+
+    if safety_data:
+        merged["safety"] = SafetyConfig(**safety_data)  # type: ignore[arg-type]
 
     return CoderConfig(**merged)  # type: ignore[arg-type]
