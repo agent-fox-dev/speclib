@@ -113,8 +113,8 @@ spec 14, and adds console logging and post-mortem/summary generation.
     - [ ] No linter warnings: `uv run ruff check packages/coder/ && uv run mypy packages/coder/coder/`
     - [ ] Requirements 2.1-2.4, 4.1-4.5 met
 
-- [ ] 4. Post-mortem, summary, & graceful shutdown
-  - [ ] 4.1 Implement post-mortem generation
+- [x] 4. Post-mortem, summary, & graceful shutdown
+  - [x] 4.1 Implement post-mortem generation
     - Create `packages/coder/coder/postmortem.py`
     - Implement `generate_postmortem()` that writes `_postmortem.md`
     - Include all required sections: Summary, Halt Reason, Context,
@@ -123,26 +123,26 @@ spec 14, and adds console logging and post-mortem/summary generation.
     - Fallback to cwd when worktree missing
     - _Requirements: 3.1, 3.2, 3.3, 3.4_
 
-  - [ ] 4.2 Implement run summary
+  - [x] 4.2 Implement run summary
     - Create `packages/coder/coder/summary.py`
     - Implement `write_run_summary()` writing `_run_summary.md`
     - Include spec name, model, groups, tokens, time, status
     - Console fallback on write failure
     - _Requirements: 6.1, 6.2, 6.3_
 
-  - [ ] 4.3 Implement graceful shutdown
+  - [x] 4.3 Implement graceful shutdown
     - Register SIGINT handler in runner entry point
     - On SIGINT: set halted flag, persist state, generate post-mortem
     - Leave worktree intact (no merge/cleanup)
     - _Requirements: 5.1, 5.2, 5.3_
 
-  - [ ] 4.V Verify task group 4
-    - [ ] Spec tests pass: TS-15-9, TS-15-10, TS-15-13, TS-15-14
-    - [ ] Edge case tests pass: TS-15-E4, TS-15-E6, TS-15-E7
-    - [ ] Property tests pass: TS-15-P1, TS-15-P3
-    - [ ] All existing tests still pass: `uv run pytest -q packages/coder/tests/ -v`
-    - [ ] No linter warnings: `uv run ruff check packages/coder/ && uv run mypy packages/coder/coder/`
-    - [ ] Requirements 3.1-3.4, 5.1-5.3, 6.1-6.3 met
+  - [x] 4.V Verify task group 4
+    - [x] Spec tests pass: TS-15-9, TS-15-10, TS-15-13, TS-15-14
+    - [x] Edge case tests pass: TS-15-E4, TS-15-E6, TS-15-E7
+    - [x] Property tests pass: TS-15-P1, TS-15-P3
+    - [x] All existing tests still pass: `uv run pytest -q packages/coder/tests/ -v`
+    - [x] No linter warnings: `uv run ruff check packages/coder/ && uv run mypy packages/coder/coder/`
+    - [x] Requirements 3.1-3.4, 5.1-5.3, 6.1-6.3 met
 
 - [ ] 5. Integration with LangGraph execution
   - [ ] 5.1 Wire circuit breaker into graph nodes
