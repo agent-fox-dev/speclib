@@ -95,11 +95,15 @@ class TestRunCommand:
         """TS-12-30: CLI run --help displays usage.
 
         Requirement: 12-REQ-7.5
-        Verifies coder run --help displays usage information.
+        Verifies coder run --help displays usage information for all
+        arguments and options including the positional campaign_dir.
         """
         result = cli_runner.invoke(cli, ["run", "--help"])
         assert result.exit_code == 0
         output = result.output.lower()
+        assert (
+            "campaign_dir" in output or "campaign-dir" in output
+        ), "Help output should mention campaign_dir positional argument"
         assert "--model" in output
         assert "--repo" in output
 

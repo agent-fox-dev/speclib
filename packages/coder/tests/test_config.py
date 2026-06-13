@@ -80,14 +80,38 @@ class TestPackageStructure:
 
         Requirement: 12-REQ-1.E1
         Verifies that the workspace member is correctly declared without
-        duplicate or conflicting entries.
+        duplicate or conflicting entries. The root pyproject.toml should
+        not contain multiple entries that resolve to the same package.
         """
+        # Check the coder package pyproject.toml is well-formed
         pyproject_path = Path(__file__).parents[2] / "pyproject.toml"
         with open(pyproject_path, "rb") as f:
             toml = tomllib.load(f)
 
-        # Verify project name is correctly set (no conflicts)
         assert toml["project"]["name"] == "coder"
+
+        # Check root workspace has no duplicate entries that resolve
+        # to packages/coder
+        root = Path(__file__).parents[3]
+        root_pyproject_path = root / "pyproject.toml"
+        with open(root_pyproject_path, "rb") as f:
+            root_toml = tomllib.load(f)
+
+        members = root_toml["tool"]["uv"]["workspace"]["members"]
+        # Count entries that would cover packages/coder
+        # (explicit "packages/coder" or glob "packages/*")
+        coder_entries = [
+            m
+            for m in members
+            if m == "packages/coder" or m == "packages/*"
+        ]
+        # There should be exactly one entry covering coder (not zero,
+        # not duplicates)
+        assert len(coder_entries) == 1, (
+            "Expected exactly 1 workspace entry covering"
+            f" packages/coder, found {len(coder_entries)}:"
+            f" {coder_entries}"
+        )
 
 
 class TestConfigLoading:

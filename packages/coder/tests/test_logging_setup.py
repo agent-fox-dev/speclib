@@ -33,20 +33,26 @@ class TestLoggingSetup:
         assert "test_event" in captured.err
 
     def test_default_debug_level(
-        self, tmp_path: Path, clean_coder_env: None
+        self,
+        tmp_path: Path,
+        clean_coder_env: None,
+        capsys: pytest.CaptureFixture[str],
     ) -> None:
         """TS-12-31: Logging defaults to DEBUG level.
 
         Requirement: 12-REQ-8.2
-        Verifies the logging system defaults to DEBUG level.
+        Verifies the logging system defaults to DEBUG level and that
+        DEBUG-level log events actually appear in output.
         """
         config = load_config(project_dir=tmp_path)
         assert config.log_level == "DEBUG"
 
         setup_logging(config)
         logger = get_logger("test")
-        # DEBUG events should appear in output
         logger.debug("debug_event")
+
+        captured = capsys.readouterr()
+        assert "debug_event" in captured.err
 
     def test_log_to_file(self, tmp_path: Path) -> None:
         """TS-12-32: Logging writes to file when configured.
@@ -105,5 +111,17 @@ class TestLoggingEdgeCases:
         logger.info("fallback_event")
 
         captured = capsys.readouterr()
+        # A warning about the unwritable log file must be emitted
+        assert (
+            "log" in captured.err.lower()
+            and (
+                "not writable" in captured.err.lower()
+                or "cannot" in captured.err.lower()
+                or "failed" in captured.err.lower()
+                or "unable" in captured.err.lower()
+                or "warning" in captured.err.lower()
+                or "nonexistent" in captured.err.lower()
+            )
+        ), "Expected a warning about the unwritable log file in stderr"
         # Console logging should still work
         assert "fallback_event" in captured.err
